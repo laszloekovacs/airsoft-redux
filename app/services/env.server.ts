@@ -6,8 +6,8 @@ const defaultAuthUrl = "http://localhost:3000"
 
 const envSchema = z.object({
 	NODE_ENV: z
-		.enum(["developement", "test", "production"])
-		.default("developement"),
+		.enum(["development", "test", "production"])
+		.default("development"),
 	DATABASE_URL: z.string().default(defaultConnectionString),
 	BETTER_AUTH_SECRET: z.string().default(defaultAuthSecret),
 	BETTER_AUTH_URL: z.string().default(defaultAuthUrl),
