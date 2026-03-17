@@ -1,4 +1,4 @@
-import { env } from "../services/env.server"
+import { env } from "~/services/env.server"
 import { Welcome } from "../welcome/welcome";
 import type { Route } from "./+types/home";
 

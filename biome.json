@@ -14,5 +14,16 @@
             "semicolons": "asNeeded",
             "indentStyle": "tab"
         }
+    },
+    "css": {
+        "formatter": {
+            "enabled": true
+        },
+        "parser": {
+            "tailwindDirectives": true
+        },
+        "assist": {
+            "enabled": true
+        }
     }
 }
