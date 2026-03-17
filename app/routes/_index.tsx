@@ -1,12 +1,10 @@
-import { env } from "~/services/env.server"
+import { logger } from "~/services/pino.server";
 import { Welcome } from "../welcome/welcome";
 import type { Route } from "./+types/_index";
 
 
 export function action() {
-  if (env.NODE_ENV == "production") {
-    console.log("production environment")
-  }
+  logger.info("hello world")
 
 }
 
