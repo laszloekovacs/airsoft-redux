@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-const defaultConnectionString = "postgresql://admin:5435@localhost:5432/airsoft"
+const defaultConnectionString = "postgres://postgres:5435@localhost/airsoft"
 
 const envSchema = z.object({
 	NODE_ENV: z
