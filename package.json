@@ -6,7 +6,8 @@
     "dev": "react-router dev",
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
-    "db-push": "bunx drizzle-kit push"
+    "db-push": "bunx drizzle-kit push",
+    "studio": "bunx drizzle-kit studio"
   },
   "dependencies": {
     "@conform-to/react": "^1.17.1",
