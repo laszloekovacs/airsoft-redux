@@ -1,7 +1,16 @@
-import type { Route } from "./+types/home";
+import { env } from "../services/env.server"
 import { Welcome } from "../welcome/welcome";
+import type { Route } from "./+types/home";
 
-export function meta({}: Route.MetaArgs) {
+
+export function action() {
+  if (env.NODE_ENV == "production") {
+    console.log("production environment")
+  }
+
+}
+
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
     { name: "description", content: "Welcome to React Router!" },
@@ -9,5 +18,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <Welcome />;
+  return <Welcome />
 }
