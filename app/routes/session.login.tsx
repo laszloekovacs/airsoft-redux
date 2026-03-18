@@ -1,11 +1,14 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
+import { isAPIError } from "better-auth/api"
 import { Form, Link, useNavigation } from "react-router"
 import z from "zod"
+import { auth } from "~/services/auth.server"
+import { logger } from "~/services/pino.server"
 import type { Route } from "./+types/session.login"
 
 const schema = z.object({
-    username: z.string(),
+    email: z.email(),
     password: z.string(),
 })
 
@@ -31,9 +34,9 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 
             <Form method="post" {...getFormProps(form)}>
                 <div>
-                    <label htmlFor={fields.username.id}>felhasználó nev</label>
-                    <input {...getInputProps(fields.username, { type: "text" })} />
-                    <div className="bg-red-500"> {fields.username.errors}</div>
+                    <label htmlFor={fields.email.id}>email</label>
+                    <input {...getInputProps(fields.email, { type: "email" })} />
+                    <div className="bg-red-500"> {fields.email.errors}</div>
                 </div>
                 <div>
                     <label htmlFor={fields.password.id}>jelszo</label>
@@ -56,7 +59,7 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
             <p>
                 meg nincs fiokod?
                 <span>
-                    <Link to="/session/signup">regisztralj</Link>
+                    <Link to="/session/signup">regisztralj!</Link>
                 </span>
             </p>
         </div>
@@ -71,5 +74,31 @@ export async function action({ request }: Route.ActionArgs) {
         return submission.reply()
     }
 
-    return submission.reply()
+    try {
+        await auth.api.signInEmail({
+            body: {
+                email: submission.value.email,
+                password: submission.value.password,
+                rememberMe: true,
+                callbackURL: "http://localhost:3000/"
+            },
+            headers: request.headers
+        })
+
+        return submission.reply()
+
+    } catch (error) {
+        logger.error(error)
+
+        if (isAPIError(error)) {
+            return submission.reply({
+                formErrors: [`${error.message}`]
+            })
+        }
+
+        return submission.reply({
+            formErrors: ["ismeretlen hiba"]
+        })
+
+    }
 }
