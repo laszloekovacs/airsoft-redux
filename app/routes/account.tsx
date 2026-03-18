@@ -9,8 +9,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         throw redirect("/session/login")
     }
 
-    const { session, user } = data
-    return { session, user }
+    return { session: data.session, user: data.user }
 }
 
 export default function AccountPage({ loaderData }: Route.ComponentProps) {
