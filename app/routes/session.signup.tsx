@@ -10,8 +10,8 @@ import type { Route } from "./+types/session.signup"
 
 const schema = z.object({
     email: z.email(),
-    password: z.string().min(8),
-    username: z.string().min(4),
+    password: z.string().min(8, { message: "Jelszó túl rövid, legalább 8 karakter kell hogy legyen" }),
+    username: z.string().min(4, { message: "túl rövid felhasználó név, legalább 4 karakter" }),
     intent: z.enum(["signup"])
 })
 
@@ -52,7 +52,7 @@ export default function SignupPage({ actionData }: Route.ComponentProps) {
                 </div>
 
                 <div>
-                    <label htmlFor={fields.username.id}>Jelszó</label>
+                    <label htmlFor={fields.username.id}>név</label>
                     <input {...getInputProps(fields.username, { type: "text" })} />
                     <div className="bg-red-400">{fields.username.errors}</div>
                 </div>
