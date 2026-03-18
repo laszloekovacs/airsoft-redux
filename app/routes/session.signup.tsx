@@ -1,7 +1,7 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
-import { Form, Link, useNavigation } from "react-router"
+import { Form, Link, redirect, useNavigation } from "react-router"
 import { z } from "zod"
 import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
@@ -9,11 +9,9 @@ import type { Route } from "./+types/session.signup"
 
 const schema = z.object({
     email: z.email(),
-    password: z
-        .string()
-        .min(8, {
-            message: "Jelszó túl rövid, legalább 8 karakter kell hogy legyen",
-        }),
+    password: z.string().min(8, {
+        message: "Jelszó túl rövid, legalább 8 karakter kell hogy legyen",
+    }),
     username: z
         .string()
         .min(4, { message: "túl rövid felhasználó név, legalább 4 karakter" }),
@@ -92,18 +90,16 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     try {
-        await auth.api.signUpEmail({
+        return auth.api.signUpEmail({
             body: {
                 username: submission.value.username,
                 name: submission.value.username,
                 email: submission.value.email,
                 password: submission.value.password,
-                callbackURL: "/",
+                callbackURL: "/"
             },
+            asResponse: true,
         })
-
-        return submission.reply()
-        // redirect to somewhere else?
     } catch (error) {
         logger.error(error)
 

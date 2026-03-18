@@ -1,7 +1,7 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
-import { Form, Link, useNavigation } from "react-router"
+import { Form, Link, redirect, useNavigation } from "react-router"
 import z from "zod"
 import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
@@ -75,30 +75,26 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     try {
-        await auth.api.signInEmail({
+        return auth.api.signInEmail({
             body: {
                 email: submission.value.email,
                 password: submission.value.password,
                 rememberMe: true,
-                callbackURL: "http://localhost:3000/"
+                callbackURL: "/",
             },
-            headers: request.headers
+            asResponse: true,
         })
-
-        return submission.reply()
-
     } catch (error) {
         logger.error(error)
 
         if (isAPIError(error)) {
             return submission.reply({
-                formErrors: [`${error.message}`]
+                formErrors: [`${error.message}`],
             })
         }
 
         return submission.reply({
-            formErrors: ["ismeretlen hiba"]
+            formErrors: ["ismeretlen hiba"],
         })
-
     }
 }
