@@ -7,14 +7,18 @@ import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
 import type { Route } from "./+types/session.signup"
 
-
 const schema = z.object({
     email: z.email(),
-    password: z.string().min(8, { message: "Jelszó túl rövid, legalább 8 karakter kell hogy legyen" }),
-    username: z.string().min(4, { message: "túl rövid felhasználó név, legalább 4 karakter" }),
-    intent: z.enum(["signup"])
+    password: z
+        .string()
+        .min(8, {
+            message: "Jelszó túl rövid, legalább 8 karakter kell hogy legyen",
+        }),
+    username: z
+        .string()
+        .min(4, { message: "túl rövid felhasználó név, legalább 4 karakter" }),
+    intent: z.enum(["signup"]),
 })
-
 
 export default function SignupPage({ actionData }: Route.ComponentProps) {
     const lastResult = actionData
@@ -25,20 +29,18 @@ export default function SignupPage({ actionData }: Route.ComponentProps) {
         lastResult,
         onValidate({ formData }) {
             return parseWithZod(formData, {
-                schema
+                schema,
             })
         },
         shouldValidate: "onBlur",
-        shouldRevalidate: "onInput"
+        shouldRevalidate: "onInput",
     })
-
 
     return (
         <div>
             <h1>Signup page</h1>
 
             <Form method="post" {...getFormProps(form)}>
-
                 <div>
                     <label htmlFor={fields.email.id}>Email</label>
                     <input {...getInputProps(fields.email, { type: "email" })} />
@@ -57,7 +59,12 @@ export default function SignupPage({ actionData }: Route.ComponentProps) {
                     <div className="bg-red-400">{fields.username.errors}</div>
                 </div>
 
-                <button type="submit" name="intent" value="signup" disabled={isSubmitting}>
+                <button
+                    type="submit"
+                    name="intent"
+                    value="signup"
+                    disabled={isSubmitting}
+                >
                     {isSubmitting ? "létrehozás..." : "Regisztrálok"}
                 </button>
 
@@ -66,18 +73,22 @@ export default function SignupPage({ actionData }: Route.ComponentProps) {
                 </div>
             </Form>
 
-            <p>már van fiókod? <span><Link to="/session/login">jelentkezz be</Link></span></p>
+            <p>
+                már van fiókod?{" "}
+                <span>
+                    <Link to="/session/login">jelentkezz be</Link>
+                </span>
+            </p>
         </div>
     )
 }
 
-
 export async function action({ request }: Route.ActionArgs) {
-    const formData = await request.formData();
-    const submission = parseWithZod(formData, { schema });
+    const formData = await request.formData()
+    const submission = parseWithZod(formData, { schema })
 
-    if (submission.status != 'success') {
-        return submission.reply();
+    if (submission.status != "success") {
+        return submission.reply()
     }
 
     try {
@@ -87,30 +98,29 @@ export async function action({ request }: Route.ActionArgs) {
                 name: submission.value.username,
                 email: submission.value.email,
                 password: submission.value.password,
-                callbackURL: "/"
-            }
-        });
+                callbackURL: "/",
+            },
+        })
 
-        return submission.reply();
+        return submission.reply()
         // redirect to somewhere else?
-
     } catch (error) {
         logger.error(error)
 
         if (isAPIError(error)) {
             return submission.reply({
-                formErrors: [`${error.message}: ${error.status}`]
+                formErrors: [`${error.message}: ${error.status}`],
             })
         }
 
         if (error instanceof Error) {
             return submission.reply({
-                formErrors: [error.message]
+                formErrors: [error.message],
             })
         }
 
         return submission.reply({
             formErrors: ["ismeretlen hiba"],
-        });
+        })
     }
 }
