@@ -1,10 +1,11 @@
 import { getFormProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
-
-
 import { Form } from "react-router"
 import { z } from "zod"
-import { authClient } from "~/services/auth.client"
+import { auth } from "~/services/auth.server"
+import { logger } from "~/services/pino.server"
+import type { Route } from "./+types/session.signup"
+
 
 
 const schema = z.object({
@@ -16,32 +17,18 @@ const schema = z.object({
 
 export default function SignupPage() {
 
-    const [form, fields] = useForm({
+    const [form] = useForm({
         onValidate({ formData }) {
             return parseWithZod(formData, {
                 schema
             })
-        },
-        onSubmit: async (event, { formData }) => {
-            event.preventDefault()
-
-            const data = Object.fromEntries(formData)
-            const fields = schema.parse(data)
-
-            await authClient.signUp.email({
-                email: fields.email,
-                password: fields.password,
-                username: fields.username,
-                name: fields.username
-            })
-
         }
     })
 
 
     return (
         <div>
-            <p>login page</p>
+            <h1>Signup page</h1>
 
             <Form method="post" {...getFormProps(form)}>
 
@@ -56,3 +43,25 @@ export default function SignupPage() {
         </div>
     )
 }
+
+
+export async function action({ request }: Route.ActionArgs) {
+    const formData = await request.formData()
+    const data = Object.fromEntries(formData)
+    const form = schema.parse(data)
+
+    // create the user entry in the database
+    await auth.api.signUpEmail({
+        body: {
+            name: form.username,
+            username: form.username,
+            email: form.email,
+            password: form.password,
+            callbackURL: "/"
+        }
+    })
+
+    logger.info(form)
+
+    return form
+} 
