@@ -1,28 +1,35 @@
-import { getFormProps, useForm } from "@conform-to/react"
+import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
-import { Form } from "react-router"
+import { isAPIError } from "better-auth/api"
+import { Form, Link, useNavigation } from "react-router"
 import { z } from "zod"
 import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
 import type { Route } from "./+types/session.signup"
 
 
-
 const schema = z.object({
     email: z.email(),
-    password: z.string(),
-    username: z.string()
+    password: z.string().min(8),
+    username: z.string().min(4),
+    intent: z.enum(["signup"])
 })
 
 
-export default function SignupPage() {
+export default function SignupPage({ actionData }: Route.ComponentProps) {
+    const lastResult = actionData
+    const navigation = useNavigation()
+    const isSubmitting = navigation.state != "idle"
 
-    const [form] = useForm({
+    const [form, fields] = useForm({
+        lastResult,
         onValidate({ formData }) {
             return parseWithZod(formData, {
                 schema
             })
-        }
+        },
+        shouldValidate: "onBlur",
+        shouldRevalidate: "onInput"
     })
 
 
@@ -32,36 +39,78 @@ export default function SignupPage() {
 
             <Form method="post" {...getFormProps(form)}>
 
-                <input type="email" name="email" id="email" />
-                <input type="password" name="password" id="" />
-                <input type="text" name="username" id="" />
+                <div>
+                    <label htmlFor={fields.email.id}>Email</label>
+                    <input {...getInputProps(fields.email, { type: "email" })} />
+                    <div className="bg-red-400">{fields.email.errors}</div>
+                </div>
 
-                <button type="submit" name="intent" value="signup">regisztrálok</button>
+                <div>
+                    <label htmlFor={fields.password.id}>Jelszó</label>
+                    <input {...getInputProps(fields.password, { type: "password" })} />
+                    <div className="bg-red-400">{fields.password.errors}</div>
+                </div>
+
+                <div>
+                    <label htmlFor={fields.username.id}>Jelszó</label>
+                    <input {...getInputProps(fields.username, { type: "text" })} />
+                    <div className="bg-red-400">{fields.username.errors}</div>
+                </div>
+
+                <button type="submit" name="intent" value="signup" disabled={isSubmitting}>
+                    {isSubmitting ? "létrehozás..." : "Regisztrálok"}
+                </button>
+
+                <div>
+                    {form.errors && <p className="bg-amber-500">{form.errors}</p>}
+                </div>
             </Form>
 
-
+            <p>már van fiókod? <span><Link to="/session/login">jelentkezz be</Link></span></p>
         </div>
     )
 }
 
 
 export async function action({ request }: Route.ActionArgs) {
-    const formData = await request.formData()
-    const data = Object.fromEntries(formData)
-    const form = schema.parse(data)
+    const formData = await request.formData();
+    const submission = parseWithZod(formData, { schema });
 
-    // create the user entry in the database
-    await auth.api.signUpEmail({
-        body: {
-            name: form.username,
-            username: form.username,
-            email: form.email,
-            password: form.password,
-            callbackURL: "/"
+    if (submission.status != 'success') {
+        return submission.reply();
+    }
+
+    try {
+        await auth.api.signUpEmail({
+            body: {
+                username: submission.value.username,
+                name: submission.value.username,
+                email: submission.value.email,
+                password: submission.value.password,
+                callbackURL: "/"
+            }
+        });
+
+        return submission.reply();
+        // redirect to somewhere else?
+
+    } catch (error) {
+        logger.error(error)
+
+        if (isAPIError(error)) {
+            return submission.reply({
+                formErrors: [`${error.message}: ${error.status}`]
+            })
         }
-    })
 
-    logger.info(form)
+        if (error instanceof Error) {
+            return submission.reply({
+                formErrors: [error.message]
+            })
+        }
 
-    return form
-} 
+        return submission.reply({
+            formErrors: ["ismeretlen hiba"],
+        });
+    }
+}
