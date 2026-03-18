@@ -9,7 +9,7 @@ const envSchema = z.object({
 		.enum(["development", "test", "production"])
 		.default("development"),
 	DATABASE_URL: z.string().default(defaultConnectionString),
-	BETTER_AUTH_SECRET: z.string().default(defaultAuthSecret),
+	BETTER_AUTH_SECRET: z.string().min(32).default(defaultAuthSecret),
 	BETTER_AUTH_URL: z.string().default(defaultAuthUrl),
 })
 
