@@ -6,7 +6,7 @@ import * as authSchema from "~/schema/auth-schema"
 import * as schema from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import { env } from "./env.server"
-import { ac, admin, organizer, user } from "./permission.server"
+import { ac, admin, organizer, user } from "./permissions.server"
 
 export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
