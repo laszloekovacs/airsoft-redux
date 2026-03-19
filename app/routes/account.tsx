@@ -6,7 +6,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const data = await auth.api.getSession(request)
 
     if (!data) {
-        throw redirect("/session/login")
+        throw redirect("login")
     }
 
     return { session: data.session, user: data.user }
