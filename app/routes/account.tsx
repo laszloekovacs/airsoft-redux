@@ -13,7 +13,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function AccountPage({ loaderData }: Route.ComponentProps) {
-    const { session, user } = loaderData
+    const { user } = loaderData
 
     return (
         <div>
