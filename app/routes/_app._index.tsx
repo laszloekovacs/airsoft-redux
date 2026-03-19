@@ -1,6 +1,6 @@
 import { logger } from "~/services/pino.server";
 import { Welcome } from "../welcome/welcome";
-import type { Route } from "./+types/_index";
+import type { Route } from "./+types/_app._index";
 
 
 export function action() {
