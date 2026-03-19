@@ -75,7 +75,7 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     try {
-        return auth.api.signInEmail({
+        return await auth.api.signInEmail({
             body: {
                 email: submission.value.email,
                 password: submission.value.password,

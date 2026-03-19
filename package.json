@@ -7,6 +7,7 @@
     "build": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
     "db-push": "bunx drizzle-kit push",
+    "auth:generate": "bun x auth@latest generate --config ./app/services/auth.server.ts --output ./app/schema/auth-schema.ts",
     "studio": "bunx drizzle-kit studio"
   },
   "dependencies": {

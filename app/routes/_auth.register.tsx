@@ -90,7 +90,7 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     try {
-        return auth.api.signUpEmail({
+        return await auth.api.signUpEmail({
             body: {
                 username: submission.value.username,
                 name: submission.value.username,

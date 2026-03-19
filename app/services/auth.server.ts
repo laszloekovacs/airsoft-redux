@@ -31,6 +31,7 @@ export const auth = betterAuth({
 				user,
 				organizer,
 			},
+			defaultRole: "user",
 		}),
 
 		username({
