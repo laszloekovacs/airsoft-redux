@@ -1,11 +1,11 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
-import { Form, Link, redirect, useNavigation } from "react-router"
+import { Form, Link, useNavigation } from "react-router"
 import z from "zod"
 import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
-import type { Route } from "./+types/session.login"
+import type { Route } from "./+types/_auth.login"
 
 const schema = z.object({
     email: z.email(),
@@ -59,7 +59,7 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
             <p>
                 meg nincs fiokod?
                 <span>
-                    <Link to="/session/signup">regisztralj!</Link>
+                    <Link to="/register">regisztralj!</Link>
                 </span>
             </p>
         </div>
