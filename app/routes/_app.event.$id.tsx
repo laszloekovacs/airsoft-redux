@@ -76,5 +76,18 @@ const ApplicationForm = () => {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	console.log("ello")
+	const formData = await request.formData()
+	const submission = parseWithZod(formData, { schema })
+
+	if (submission.status != "success") {
+		return submission.reply()
+	}
+
+	try {
+		// insert player into the roster
+		//		const result = await db.insert()
+		console.log("jelentkeztel")
+	} catch (_) {
+		return submission.reply({ formErrors: ["sikertelen jelentkezes"] })
+	}
 }

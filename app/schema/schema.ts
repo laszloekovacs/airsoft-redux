@@ -23,3 +23,13 @@ export const EventTable = pgTable("event", {
 })
 export type EventTableInsert = typeof EventTable.$inferInsert
 export type EventTableSelect = typeof EventTable.$inferSelect
+
+
+// players applied to the event
+export const eventRoster = pgTable("event_roster", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	userId: text().references(()=> user.id, {onDelete: "set null"}),
+	message: text(),
+	createdAt: date().defaultNow().notNull(),
+	faction: text().default("null")
+})
