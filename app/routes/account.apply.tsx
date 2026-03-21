@@ -20,7 +20,7 @@ export default function ApplicationForm({ actionData }: Route.ComponentProps) {
 				schema,
 			})
 		},
-		shouldValidate: "onSubmit",
+		shouldValidate: "onBlur",
 		shouldRevalidate: "onBlur",
 	})
 
@@ -29,25 +29,29 @@ export default function ApplicationForm({ actionData }: Route.ComponentProps) {
 			<h1>jelentkezz szervezonek</h1>
 			<p>szervezokent tudsz esemenyeket letrehozni.</p>
 
-			<Form {...getFormProps(form)}>
+			<Form method="post" {...getFormProps(form)}>
 				<label htmlFor={fields.message.id}>uzenet</label>
 				<input {...getInputProps(fields.message, { type: "text" })} />
 				<div id={fields.message.errorId}>{fields.message.errors}</div>
-				<button type="submit" name="intent" value="applyAsOrganizer"></button>
+				<button type="submit" name="intent" value="applyAsOrganizer">
+					jelentkezem
+				</button>
 			</Form>
 		</div>
 	)
 }
 
 export async function action({ request }: Route.ActionArgs) {
+	console.log("creating account")
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, { schema })
 
-	if (submission.status != "success") return submission.reply()
+	if (submission.status != "success") {
+		return submission.reply()
+	}
 
 	//  create applycation in the database
-
 	// return sub reply with formErrors filled out
 
-	return redirect("/account")
+	throw redirect("/account")
 }

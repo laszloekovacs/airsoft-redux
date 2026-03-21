@@ -1,4 +1,4 @@
-import { redirect } from "react-router"
+import { Outlet, redirect } from "react-router"
 import { auth } from "~/services/auth.server"
 import type { Route } from "./+types/account"
 
@@ -21,6 +21,8 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 
 			<p>{user.email}</p>
 			<p>{user.name}</p>
+
+			<Outlet />
 		</div>
 	)
 }
