@@ -1,5 +1,5 @@
 import { Link } from "react-router"
-import { EventTable, type EventTableSelect } from "~/schema/schema"
+import { type EventTableSelect, eventTable } from "~/schema/schema"
 import type { SessionData } from "~/services/auth.server"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
@@ -17,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const session = await auth.api.getSession(request)
 
 	// fetch new events
-	const events = await db.select().from(EventTable).limit(10)
+	const events = await db.select().from(eventTable).limit(10)
 
 	return { session, events }
 }

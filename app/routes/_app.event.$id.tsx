@@ -1,22 +1,18 @@
-import {
-	getCollectionProps,
-	getFormProps,
-	getInputProps,
-	useForm,
-} from "@conform-to/react"
+import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
-import { useFetcher } from "react-router"
+import { redirect, useFetcher } from "react-router"
 import z from "zod"
-import { EventTable } from "~/schema/schema"
+import { eventRoster, eventTable } from "~/schema/schema"
+import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.event.$id"
 
 export async function loader({ params }: Route.LoaderArgs) {
 	const events = await db
 		.select()
-		.from(EventTable)
-		.where(eq(EventTable.id, Number(params.id)))
+		.from(eventTable)
+		.where(eq(eventTable.id, Number(params.id)))
 
 	if (events.length != 1) {
 		throw new Error("nincs ilyen esemeny")
@@ -49,10 +45,9 @@ const schema = z.object({
 
 const ApplicationForm = () => {
 	const fetcher = useFetcher()
-	const lastResult = fetcher.data
 
 	const [form, fields] = useForm({
-		lastResult,
+		lastResult: fetcher.data,
 		constraint: getZodConstraint(schema),
 		shouldRevalidate: "onBlur",
 		shouldValidate: "onBlur",
@@ -75,7 +70,7 @@ const ApplicationForm = () => {
 	)
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, params }: Route.ActionArgs) {
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, { schema })
 
@@ -84,9 +79,30 @@ export async function action({ request }: Route.ActionArgs) {
 	}
 
 	try {
-		// insert player into the roster
-		//		const result = await db.insert()
+		// get user id
+		const session = await auth.api.getSession({
+			headers: request.headers,
+		})
+
+		console.log(session?.user.id)
+
+		if (!session) throw new Error("user required")
+
 		console.log("jelentkeztel")
+
+		// insert player into the roster
+		// look out for reinsertion
+		const result = await db
+			.insert(eventRoster)
+			.values({
+				userId: session.user.id,
+				eventId: Number(params.id),
+				message: submission.value.message ?? null,
+			})
+			.returning({ id: eventRoster.id })
+
+		return redirect("/")
+		//		return submission.reply
 	} catch (_) {
 		return submission.reply({ formErrors: ["sikertelen jelentkezes"] })
 	}

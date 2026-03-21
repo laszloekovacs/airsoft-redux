@@ -2,7 +2,7 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { Form, redirect } from "react-router"
 import z from "zod"
-import { EventTable } from "~/schema/schema"
+import { eventTable } from "~/schema/schema"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/organizer.events.new"
@@ -57,7 +57,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	// create an event in the database with a provided name
 	const result = await db
-		.insert(EventTable)
+		.insert(eventTable)
 		.values({
 			title: submission.value.title,
 			userId: session.user.id,
