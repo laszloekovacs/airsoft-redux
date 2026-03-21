@@ -2,6 +2,9 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { Form, redirect } from "react-router"
 import { z } from "zod"
+import { organizerApplicationsTable } from "~/schema/schema"
+import { auth } from "~/services/auth.server"
+import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/account.apply"
 
 const schema = z.object({
@@ -9,6 +12,7 @@ const schema = z.object({
 	intent: z.enum(["applyAsOrganizer"]),
 })
 
+// TODO: handle already applied, accepted, rejected
 export default function ApplicationForm({ actionData }: Route.ComponentProps) {
 	const lastResult = actionData
 
@@ -42,7 +46,6 @@ export default function ApplicationForm({ actionData }: Route.ComponentProps) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-	console.log("creating account")
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, { schema })
 
@@ -50,8 +53,38 @@ export async function action({ request }: Route.ActionArgs) {
 		return submission.reply()
 	}
 
-	//  create applycation in the database
-	// return sub reply with formErrors filled out
+	// get the current users id
+	const sessionData = await auth.api.getSession(request)
+	if (!sessionData) {
+		throw Error("Auth error")
+	}
 
-	throw redirect("/account")
+	//  create application in the database
+	const { user } = sessionData
+	const result = createOrganizerApplication(user.id, submission.value.message)
+
+	if (!result) {
+		throw new Error("belso hiba: sikertelen jelentkezes")
+	}
+
+	return redirect("/account")
+}
+
+async function createOrganizerApplication(
+	userId: string,
+	message: string,
+): Promise<string | null> {
+	const result = await db
+		.insert(organizerApplicationsTable)
+		.values({
+			message,
+			userId,
+		})
+		.returning({ id: organizerApplicationsTable.id })
+
+	if (result.length == 0) {
+		return null
+	}
+
+	return result[0].id.toString()
 }
