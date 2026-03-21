@@ -19,6 +19,6 @@ input {
 	@apply border-2 border-amber-300;
 }
 
-input {
+button {
 	@apply border border-amber-300;
 }
