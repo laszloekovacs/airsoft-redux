@@ -3,7 +3,7 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { redirect, useFetcher } from "react-router"
 import z from "zod"
-import { eventRoster, eventTable } from "~/schema/schema"
+import { eventTable, registrationTable } from "~/schema/schema"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.event.$id"
@@ -93,13 +93,13 @@ export async function action({ request, params }: Route.ActionArgs) {
 		// insert player into the roster
 		// look out for reinsertion
 		const result = await db
-			.insert(eventRoster)
+			.insert(registrationTable)
 			.values({
 				userId: session.user.id,
 				eventId: Number(params.id),
 				message: submission.value.message ?? null,
 			})
-			.returning({ id: eventRoster.id })
+			.returning({ id: registrationTable.id })
 
 		return redirect("/")
 		//		return submission.reply

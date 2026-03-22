@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm"
-import { type EventRosterSelectType, eventRoster } from "~/schema/schema"
+import { type RegistrationSelectType, registrationTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/organizer.events.$eid.roster"
 
@@ -7,8 +7,8 @@ export async function loader({ params }: Route.LoaderArgs) {
 	// load roster
 	const roster = await db
 		.select()
-		.from(eventRoster)
-		.where(eq(eventRoster.eventId, Number(params.eid)))
+		.from(registrationTable)
+		.where(eq(registrationTable.eventId, Number(params.eid)))
 
 	return { roster }
 }
@@ -25,7 +25,7 @@ export default function RosterPage({ loaderData }: Route.ComponentProps) {
 	)
 }
 
-const Roster = ({ roster }: { roster: EventRosterSelectType[] }) => {
+const Roster = ({ roster }: { roster: RegistrationSelectType[] }) => {
 	const list = roster.map((i) => (
 		<li key={i.id}>
 			<div>{i.userId}</div>
@@ -33,11 +33,11 @@ const Roster = ({ roster }: { roster: EventRosterSelectType[] }) => {
 	))
 
 	return (
-		<>
+		<div>
 			<p>list of players</p>
 			<div>
 				<ul>{list}</ul>
 			</div>
-		</>
+		</div>
 	)
 }
