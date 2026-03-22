@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm"
+import { Link } from "react-router"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/organizer.events.$eid"
+import type { Route } from "./+types/organizer.events.$eid._index"
 
 export async function loader({ params }: Route.LoaderArgs) {
 	const event = await db
@@ -24,6 +25,8 @@ export default function EventSummary({ loaderData }: Route.ComponentProps) {
 			<h1>Esemeny osszefoglalo oldal</h1>
 
 			<h2>{event.title}</h2>
+
+			<Link to={`/organizer/events/${event.id}/roster`}>reszletek</Link>
 		</div>
 	)
 }
