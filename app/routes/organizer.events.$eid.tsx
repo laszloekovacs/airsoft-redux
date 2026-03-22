@@ -1,13 +1,13 @@
 import { eq } from "drizzle-orm"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/organizer.events.$id"
+import type { Route } from "./+types/organizer.events.$eid"
 
 export async function loader({ params }: Route.LoaderArgs) {
 	const event = await db
 		.select()
 		.from(eventTable)
-		.where(eq(eventTable.id, Number(params.id)))
+		.where(eq(eventTable.id, Number(params.eid)))
 
 	if (event.length != 1) {
 		throw new Error("nincs ilyen esemeny!")
