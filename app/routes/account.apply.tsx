@@ -3,7 +3,7 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { Form, redirect } from "react-router"
 import { z } from "zod"
-import { organizerApplicationsTable, registrationTable } from "~/schema/schema"
+import { organizerApplicationsTable } from "~/schema/schema"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/account.apply"
@@ -17,22 +17,23 @@ const schema = z.object({
 export async function loader({ request }: Route.LoaderArgs) {
 	const session = await auth.api.getSession(request)
 
-	// check if user is logged in
-	const user = session?.user || null
-
-	if (user) {
-		// look up application belonging to user
-		const usersApplication = await db
-			.select()
-			.from(registrationTable)
-			.where(eq(registrationTable.userId, user.id))
-
-		if (usersApplication.length != 0) {
-			return { status: "pending" } as const
-		}
+	if (!session) {
+		throw new Error("nem megengedett")
 	}
 
-	return { status: "ready" } as const
+	const { user } = session
+
+	// look up application belonging to user
+	const usersApplication = await db
+		.select()
+		.from(organizerApplicationsTable)
+		.where(eq(organizerApplicationsTable.userId, user.id))
+
+	if (usersApplication.length != 0) {
+		return { status: "available" } as const
+	}
+
+	return { status: "pending" } as const
 }
 
 export default function ApplicationForm({
@@ -53,6 +54,14 @@ export default function ApplicationForm({
 		shouldValidate: "onBlur",
 		shouldRevalidate: "onBlur",
 	})
+
+	if (applicationPending) {
+		return (
+			<div>
+				<p>már jelentkeztél szervezőnek</p>
+			</div>
+		)
+	}
 
 	return (
 		<div>
