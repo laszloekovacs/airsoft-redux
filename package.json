@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "react-router dev",
-    "build": "react-router build",
-    "start": "react-router-serve ./build/server/index.js",
+    "dev": "vite",
+    "build": "vite build",
+    "start": "bun ./app/server.js",
     "db-push": "bunx drizzle-kit push",
-    "auth:generate": "bun x auth@latest generate --config ./app/services/auth.server.ts --output ./app/schema/auth-schema.ts",
+    "auth:generate": "bunx auth@latest generate --config ./app/services/auth.server.ts --output ./app/schema/auth-schema.ts",
     "studio": "bunx drizzle-kit studio"
   },
   "dependencies": {
@@ -15,7 +15,6 @@
     "@conform-to/zod": "^1.17.1",
     "@react-router/fs-routes": "^7.13.1",
     "@react-router/node": "7.13.1",
-    "@react-router/serve": "7.13.1",
     "better-auth": "^1.5.5",
     "drizzle-orm": "^0.45.1",
     "drizzle-seed": "^0.3.1",
@@ -26,6 +25,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "7.13.1",
+    "react-router-hono-server": "^2.25.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
