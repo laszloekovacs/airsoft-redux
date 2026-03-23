@@ -5,9 +5,9 @@ const db = drizzle(env.DATABASE_URL)
 
 try {
 	await db.execute("SELECT 1")
-	console.error("connected to db")
+	console.info("connected to db")
 } catch (error) {
-	console.error("db connection failed")
+	console.error("db connection failed, is the connection string correct?")
 
 	if (error instanceof Error) {
 		console.error(`Message: ${error.message}`)
