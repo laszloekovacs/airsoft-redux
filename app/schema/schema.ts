@@ -1,4 +1,4 @@
-import {date, integer, pgTable, text, uuid} from "drizzle-orm/pg-core"
+import {date, integer, pgEnum, pgTable, text, uuid} from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
 
 export const loggingTable = pgTable("loggin", {
@@ -6,11 +6,15 @@ export const loggingTable = pgTable("loggin", {
 	message: text().notNull(),
 })
 
+export const statusEnum = pgEnum("status", ["pending", "accepted", "rejected"])
+
 export const organizerApplicationsTable = pgTable("organizer_applications", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	userId: text().references(() => user.id, { onDelete: "set null"}),
 	message: text().notNull(),
 	createdAt: date().defaultNow().notNull(),
+	status: statusEnum().notNull().default("pending"),
+	rejectionReason: text() 
 })
 export type OrganizerApplicationsSelect = typeof organizerApplicationsTable.$inferSelect
 

@@ -30,10 +30,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 		.where(eq(organizerApplicationsTable.userId, user.id))
 
 	if (usersApplication.length != 0) {
-		return { status: "available" } as const
+		return { status: usersApplication[0].status }
 	}
 
-	return { status: "pending" } as const
+	return { status: "available" } as const
 }
 
 export default function ApplicationForm({
@@ -41,7 +41,7 @@ export default function ApplicationForm({
 	loaderData,
 }: Route.ComponentProps) {
 	const lastResult = actionData
-	const applicationPending = loaderData.status == "pending"
+	const { status } = loaderData
 
 	const [form, fields] = useForm({
 		lastResult,
@@ -55,7 +55,7 @@ export default function ApplicationForm({
 		shouldRevalidate: "onBlur",
 	})
 
-	if (applicationPending) {
+	if (status == "pending") {
 		return (
 			<div>
 				<p>már jelentkeztél szervezőnek</p>
@@ -63,21 +63,38 @@ export default function ApplicationForm({
 		)
 	}
 
-	return (
-		<div>
-			<h1>jelentkezz szervezonek</h1>
-			<p>szervezokent tudsz esemenyeket letrehozni.</p>
+	if (status == "available")
+		return (
+			<div>
+				<h1>jelentkezz szervezonek</h1>
+				<p>szervezokent tudsz esemenyeket letrehozni.</p>
 
-			<Form method="post" {...getFormProps(form)}>
-				<label htmlFor={fields.message.id}>uzenet</label>
-				<input {...getInputProps(fields.message, { type: "text" })} />
-				<div id={fields.message.errorId}>{fields.message.errors}</div>
-				<button type="submit" name="intent" value="applyAsOrganizer">
-					jelentkezem
-				</button>
-			</Form>
-		</div>
-	)
+				<Form method="post" {...getFormProps(form)}>
+					<label htmlFor={fields.message.id}>uzenet</label>
+					<input {...getInputProps(fields.message, { type: "text" })} />
+					<div id={fields.message.errorId}>{fields.message.errors}</div>
+					<button type="submit" name="intent" value="applyAsOrganizer">
+						jelentkezem
+					</button>
+				</Form>
+			</div>
+		)
+
+	if (status == "accepted") {
+		return (
+			<div>
+				<p>már szervező vagy</p>
+			</div>
+		)
+	}
+
+	if (status == "rejected") {
+		return (
+			<div>
+				<p>jelentezésedet visszautasítottuk</p>
+			</div>
+		)
+	}
 }
 
 export async function action({ request }: Route.ActionArgs) {
