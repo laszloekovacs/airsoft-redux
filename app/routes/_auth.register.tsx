@@ -1,7 +1,7 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
-import { Form, Link, useNavigation } from "react-router"
+import { Form, Link, redirect, useNavigation } from "react-router"
 import { z } from "zod"
 import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
@@ -90,16 +90,30 @@ export async function action({ request }: Route.ActionArgs) {
 	}
 
 	try {
-		return await auth.api.signUpEmail({
+		const authResponse = await auth.api.signUpEmail({
 			body: {
 				username: submission.value.username,
 				name: submission.value.username,
 				email: submission.value.email,
 				password: submission.value.password,
-				callbackURL: "/",
+				callbackURL: "/account",
 			},
-			asResponse: true,
 			headers: request.headers,
+			asResponse: true,
+		})
+
+		if (!authResponse.ok) {
+			return submission.reply({
+				formErrors: ["Helytelen email vagy jelszó"],
+			})
+		}
+
+		// pass the response manually, rr7 would serialize the response
+		const setCookie = authResponse.headers.get("set-cookie")
+		return redirect("/", {
+			headers: {
+				...(setCookie ? { "set-cookie": setCookie } : {}),
+			},
 		})
 	} catch (error) {
 		logger.error(error)
