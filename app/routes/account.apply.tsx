@@ -1,20 +1,46 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
+import { eq } from "drizzle-orm"
 import { Form, redirect } from "react-router"
 import { z } from "zod"
-import { organizerApplicationsTable } from "~/schema/schema"
+import { organizerApplicationsTable, registrationTable } from "~/schema/schema"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/account.apply"
 
 const schema = z.object({
-	message: z.string({ error: "kotelezo kitolteni a mezot" }),
+	message: z.string({ error: "Kötelező kitölteni az üzenet mezőt" }),
 	intent: z.enum(["applyAsOrganizer"]),
 })
 
-// TODO: handle already applied, accepted, rejected
-export default function ApplicationForm({ actionData }: Route.ComponentProps) {
+// TODO: handle user application state applied, accepted, rejected
+export async function loader({ request }: Route.LoaderArgs) {
+	const session = await auth.api.getSession(request)
+
+	// check if user is logged in
+	const user = session?.user || null
+
+	if (user) {
+		// look up application belonging to user
+		const usersApplication = await db
+			.select()
+			.from(registrationTable)
+			.where(eq(registrationTable.userId, user.id))
+
+		if (usersApplication.length != 0) {
+			return { status: "pending" } as const
+		}
+	}
+
+	return { status: "ready" } as const
+}
+
+export default function ApplicationForm({
+	actionData,
+	loaderData,
+}: Route.ComponentProps) {
 	const lastResult = actionData
+	const applicationPending = loaderData.status == "pending"
 
 	const [form, fields] = useForm({
 		lastResult,
