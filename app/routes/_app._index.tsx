@@ -27,10 +27,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div>
-			<div>
-				<h1>Airsoft naptar</h1>
-				<SessionInfo session={session} />
-			</div>
+			<SessionInfo session={session} />
+
 			<EventList events={events} />
 		</div>
 	)
