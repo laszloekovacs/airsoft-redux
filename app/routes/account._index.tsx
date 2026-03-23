@@ -1,7 +1,7 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
-import { Form, redirect } from "react-router"
+import { Form, Link, redirect } from "react-router"
 import { z } from "zod"
 import { organizerApplicationsTable } from "~/schema/schema"
 import { auth } from "~/services/auth.server"
@@ -85,6 +85,7 @@ export default function ApplicationForm({
 		return (
 			<div>
 				<p>már szervező vagy</p>
+				<Link to="/organizer/events/new">hozz létre eseményt</Link>
 			</div>
 		)
 	}
