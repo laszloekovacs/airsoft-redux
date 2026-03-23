@@ -16,11 +16,17 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 	const { user } = loaderData
 
 	return (
-		<div>
-			<h1>Felhasznalo fiok</h1>
+		<div className="flex flex-col min-h-screen px-6 py-6">
+			<h1>Felhasználó fiók</h1>
 
+			<h2>{user.username}</h2>
 			<p>{user.email}</p>
-			<p>{user.name}</p>
+
+			<img
+				src={user.image ?? "https://picsum.photos/150/150"}
+				alt={`${user.name} profilképe`}
+				width={150}
+			/>
 
 			<Outlet />
 		</div>
