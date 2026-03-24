@@ -1,18 +1,13 @@
 import { eq } from "drizzle-orm"
 import { Link } from "react-router"
+import requireSession from "~/functions/requiresession"
 import { type EventTableSelect, eventTable } from "~/schema/schema"
-import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/organizer._index"
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const authCookie = await auth.api.getSession(request)
+	const { user } = await requireSession(request)
 
-	if (!authCookie) {
-		throw new Error("nincs hozzáférésed")
-	}
-
-	const { user } = authCookie
 	// list users organized events
 	const events = await db
 		.select()
