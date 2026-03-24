@@ -3,6 +3,7 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { Form, Link, redirect } from "react-router"
 import { z } from "zod"
+import requireSession from "~/functions/requiresession"
 import { organizerApplicationsTable } from "~/schema/schema"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
@@ -15,13 +16,7 @@ const schema = z.object({
 
 // TODO: handle user application state applied, accepted, rejected
 export async function loader({ request }: Route.LoaderArgs) {
-	const session = await auth.api.getSession(request)
-
-	if (!session) {
-		throw new Error("nem megengedett")
-	}
-
-	const { user } = session
+	const { user } = await requireSession(request)
 
 	// look up application belonging to user
 	const usersApplication = await db
@@ -100,6 +95,8 @@ export default function ApplicationForm({
 }
 
 export async function action({ request }: Route.ActionArgs) {
+	const { user } = await requireSession(request)
+
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, { schema })
 
@@ -107,14 +104,6 @@ export async function action({ request }: Route.ActionArgs) {
 		return submission.reply()
 	}
 
-	// get the current users id
-	const sessionData = await auth.api.getSession(request)
-	if (!sessionData) {
-		throw Error("Auth error")
-	}
-
-	//  create application in the database
-	const { user } = sessionData
 	const result = createOrganizerApplication(user.id, submission.value.message)
 
 	if (!result) {

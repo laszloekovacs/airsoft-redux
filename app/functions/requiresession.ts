@@ -6,4 +6,6 @@ export default async function requireSession(request: Request, redirectTo = "/lo
     if (!session) {
         throw redirect(redirectTo)
     }
+
+    return session
 }

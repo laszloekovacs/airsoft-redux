@@ -1,16 +1,12 @@
-import { Outlet, redirect } from "react-router"
+import { Outlet } from "react-router"
 import { PageHeader } from "~/components/header"
-import { auth } from "~/services/auth.server"
+import requireSession from "~/functions/requiresession"
 import type { Route } from "./+types/account"
 
 export async function loader({ request }: Route.LoaderArgs) {
-	const data = await auth.api.getSession(request)
+	const { session, user } = await requireSession(request)
 
-	if (!data) {
-		throw redirect("/login")
-	}
-
-	return { session: data.session, user: data.user }
+	return { session, user }
 }
 
 export default function AccountPage({ loaderData }: Route.ComponentProps) {
