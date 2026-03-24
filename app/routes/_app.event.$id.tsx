@@ -1,37 +1,60 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
-import { eq } from "drizzle-orm"
-import { redirect, useFetcher } from "react-router"
+import { and, eq } from "drizzle-orm"
+import { useFetcher } from "react-router"
 import z from "zod"
 import { eventTable, registrationTable } from "~/schema/schema"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.event.$id"
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request }: Route.LoaderArgs) {
+	const session = await auth.api.getSession(request)
+
+	if (!session) throw new Response("nem engedélyezett", { status: 401 })
+
+	const { user } = session
+
 	const events = await db
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.id, Number(params.id)))
+		.limit(1)
 
 	if (events.length != 1) {
-		throw new Error("nincs ilyen esemeny")
+		throw new Response("nincs ilyen esemény", { status: 404 })
 	}
 
-	return { event: events[0] }
+	const event = events[0]
+
+	// check if user has a registration for this event
+	const registrations = await db
+		.select()
+		.from(registrationTable)
+		.where(
+			and(
+				eq(registrationTable.eventId, event.id),
+				eq(registrationTable.userId, session.user.id),
+			),
+		)
+
+	// might want to use some information from this like "signed up at", dont convert to bool
+	const registration = registrations[0] ?? null
+
+	return { event, registration }
 }
 
 export default function EventDetailsPage({ loaderData }: Route.ComponentProps) {
-	const { event } = loaderData
+	const { event, registration } = loaderData
+
+	const isRegistered = !!registration
 
 	return (
 		<div>
 			<h1>Event</h1>
 			<pre>{JSON.stringify(event)}</pre>
 
-			<div>
-				<ApplicationForm />
-			</div>
+			<ApplicationForm isRegistered={isRegistered} />
 		</div>
 	)
 }
@@ -41,22 +64,21 @@ const schema = z.object({
 	intent: z.enum(["apply"]).default("apply"),
 })
 
-// props should be event id and userid
-
-const ApplicationForm = () => {
+const ApplicationForm = ({ isRegistered }: { isRegistered: boolean }) => {
 	const fetcher = useFetcher()
 
 	const [form, fields] = useForm({
 		lastResult: fetcher.data,
 		constraint: getZodConstraint(schema),
-		shouldRevalidate: "onBlur",
-		shouldValidate: "onBlur",
-		onValidate({ formData }) {
-			return parseWithZod(formData, {
-				schema,
-			})
-		},
 	})
+
+	if (isRegistered) {
+		return (
+			<div>
+				<span>Már jelentkeztél erre az eseményre</span>
+			</div>
+		)
+	}
 
 	return (
 		<div>
@@ -78,18 +100,10 @@ export async function action({ request, params }: Route.ActionArgs) {
 		return submission.reply()
 	}
 
+	const session = await auth.api.getSession(request)
+	if (!session) throw new Response("nem engedélyezett", { status: 401 })
+
 	try {
-		// get user id
-		const session = await auth.api.getSession({
-			headers: request.headers,
-		})
-
-		console.log(session?.user.id)
-
-		if (!session) throw new Error("user required")
-
-		console.log("jelentkeztel")
-
 		// insert player into the roster
 		// look out for reinsertion
 		const result = await db
@@ -99,11 +113,16 @@ export async function action({ request, params }: Route.ActionArgs) {
 				eventId: Number(params.id),
 				message: submission.value.message ?? null,
 			})
+			.onConflictDoNothing({
+				target: [registrationTable.userId, registrationTable.eventId],
+			})
 			.returning({ id: registrationTable.id })
 
-		return redirect("/")
-		//		return submission.reply
-	} catch (_) {
-		return submission.reply({ formErrors: ["sikertelen jelentkezes"] })
+		// the page gets revalidated, so loader should indicate success and doesnt need to
+		// return any data trough comform
+		return submission.reply()
+	} catch (err) {
+		console.log(err)
+		return submission.reply({ formErrors: ["sikertelen jelentkezés"] })
 	}
 }
