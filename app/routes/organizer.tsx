@@ -1,5 +1,6 @@
 import { Outlet } from "react-router"
 import { PageHeader } from "~/components/header"
+import requireSession from "~/functions/requiresession"
 import { auth } from "~/services/auth.server"
 import type { Route } from "./+types/organizer"
 
@@ -18,15 +19,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 		throw new Error("permission denied")
 	}
 
-	const authResult = await auth.api.getSession({
-		headers: request.headers,
-	})
+	const { user } = await requireSession(request)
 
-	if (!authResult) {
-		throw new Error("session data unavailable")
-	}
-
-	return { user: authResult.user }
+	return { user }
 }
 
 // layout, organizer role guard

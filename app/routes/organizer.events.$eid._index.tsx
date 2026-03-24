@@ -1,20 +1,15 @@
 import { and, eq } from "drizzle-orm"
 import { Link } from "react-router"
+import expectOne from "~/functions/expectone"
+import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
-import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/organizer.events.$eid._index"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-	const sessionCookie = await auth.api.getSession(request)
+	const { user } = await requireSession(request)
 
-	if (!sessionCookie) {
-		throw new Error("nincs hozzáférésed")
-	}
-
-	const { user } = sessionCookie
-
-	const event = await db
+	const events = await db
 		.select()
 		.from(eventTable)
 		.where(
@@ -24,11 +19,9 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 			),
 		)
 
-	if (event.length != 1) {
-		throw new Error("nincs ilyen esemény!")
-	}
+	const event = expectOne(events)
 
-	return { event: event[0] }
+	return { event }
 }
 
 export default function EventSummary({ loaderData }: Route.ComponentProps) {

@@ -2,8 +2,9 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { Form, redirect } from "react-router"
 import z from "zod"
+import expectOne from "~/functions/expectone"
+import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
-import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/organizer.events.new"
 
@@ -42,6 +43,8 @@ export default function NewEventForm({ actionData }: Route.ComponentProps) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+	const { user } = await requireSession(request)
+
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, { schema })
 
@@ -49,24 +52,20 @@ export async function action({ request }: Route.ActionArgs) {
 		return submission.reply()
 	}
 
-	// get the users id
-	const session = await auth.api.getSession(request)
-	if (!session) {
-		throw new Error("nincs bejelentkezve")
-	}
-
 	// create an event in the database with a provided name
 	const result = await db
 		.insert(eventTable)
 		.values({
 			title: submission.value.title,
-			userId: session.user.id,
+			userId: user.id,
 		})
 		.returning()
 
-	if (result.length == 0) {
-		throw new Error("nem sikerult letrehozni az esemenyt")
-	}
+	expectOne(result, {
+		notFound() {
+			throw new Error("nem sikerult az esemenyt letrehozni!")
+		},
+	})
 
 	return redirect(`/organizer/events/${result[0].id}`)
 }
