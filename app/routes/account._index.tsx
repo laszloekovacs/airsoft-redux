@@ -5,7 +5,6 @@ import { Form, Link, redirect } from "react-router"
 import { z } from "zod"
 import requireSession from "~/functions/requiresession"
 import { organizerApplicationsTable } from "~/schema/schema"
-import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/account._index"
 
@@ -104,7 +103,10 @@ export async function action({ request }: Route.ActionArgs) {
 		return submission.reply()
 	}
 
-	const result = createOrganizerApplication(user.id, submission.value.message)
+	const result = await createOrganizerApplication(
+		user.id,
+		submission.value.message,
+	)
 
 	if (!result) {
 		throw new Error("belso hiba: sikertelen jelentkezes")
