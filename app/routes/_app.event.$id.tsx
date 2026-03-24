@@ -106,20 +106,17 @@ export async function action({ request, params }: Route.ActionArgs) {
 	try {
 		// insert player into the roster
 		// look out for reinsertion
-		const result = await db
+		// the page gets revalidated, so loader should indicate success and doesnt need to
+		// return any data trough comform, onConflictDoNothing will skip insertion
+		await db
 			.insert(registrationTable)
 			.values({
 				userId: session.user.id,
 				eventId: Number(params.id),
 				message: submission.value.message ?? null,
 			})
-			.onConflictDoNothing({
-				target: [registrationTable.userId, registrationTable.eventId],
-			})
-			.returning({ id: registrationTable.id })
+			.onConflictDoNothing()
 
-		// the page gets revalidated, so loader should indicate success and doesnt need to
-		// return any data trough comform
 		return submission.reply()
 	} catch (err) {
 		console.log(err)
