@@ -3,17 +3,14 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { and, eq } from "drizzle-orm"
 import { useFetcher } from "react-router"
 import z from "zod"
+import expectOne from "~/functions/expectone"
+import requireSession from "~/functions/requiresession"
 import { eventTable, registrationTable } from "~/schema/schema"
-import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.event.$id"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-	const session = await auth.api.getSession(request)
-
-	if (!session) throw new Response("nem engedélyezett", { status: 401 })
-
-	const { user } = session
+	const { user } = await requireSession(request)
 
 	const events = await db
 		.select()
@@ -21,27 +18,20 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 		.where(eq(eventTable.id, Number(params.id)))
 		.limit(1)
 
-	if (events.length != 1) {
-		throw new Response("nincs ilyen esemény", { status: 404 })
-	}
-
-	const event = events[0]
+	const event = expectOne(events)
 
 	// check if user has a registration for this event
-	const registrations = await db
+	const [registration] = await db
 		.select()
 		.from(registrationTable)
 		.where(
 			and(
 				eq(registrationTable.eventId, event.id),
-				eq(registrationTable.userId, session.user.id),
+				eq(registrationTable.userId, user.id),
 			),
 		)
 
-	// might want to use some information from this like "signed up at", dont convert to bool
-	const registration = registrations[0] ?? null
-
-	return { event, registration }
+	return { event, registration: registration ?? null }
 }
 
 export default function EventDetailsPage({ loaderData }: Route.ComponentProps) {
@@ -93,15 +83,12 @@ const ApplicationForm = ({ isRegistered }: { isRegistered: boolean }) => {
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-	const formData = await request.formData()
-	const submission = parseWithZod(formData, { schema })
+	const { user } = await requireSession(request)
+	const submission = parseWithZod(await request.formData(), { schema })
 
 	if (submission.status != "success") {
 		return submission.reply()
 	}
-
-	const session = await auth.api.getSession(request)
-	if (!session) throw new Response("nem engedélyezett", { status: 401 })
 
 	try {
 		// insert player into the roster
@@ -111,7 +98,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 		await db
 			.insert(registrationTable)
 			.values({
-				userId: session.user.id,
+				userId: user.id,
 				eventId: Number(params.id),
 				message: submission.value.message ?? null,
 			})
