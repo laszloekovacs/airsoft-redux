@@ -1,26 +1,36 @@
-import { eq } from "drizzle-orm"
-import { type RegistrationSelectType, registrationTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
+import type { RegistrationSelectType } from "~/schema/schema"
 import type { Route } from "./+types/organizer.events.$eid.roster"
 
 export async function loader({ params }: Route.LoaderArgs) {
-	// load roster
-	const roster = await db
-		.select()
-		.from(registrationTable)
-		.where(eq(registrationTable.eventId, Number(params.eid)))
+	const factions: Array<{ id: "string"; name: string }> = [
+		{
+			id: "string",
+			name: "alpha",
+		},
+		{
+			id: "string",
+			name: "bravo",
+		},
+	]
 
-	return { roster }
+	return { factions }
 }
 
 // list all applicants
 export default function RosterPage({ loaderData }: Route.ComponentProps) {
-	const { roster } = loaderData
+	const { factions } = loaderData
+
+	//const roster = factions.map()
 
 	return (
 		<div>
 			<h1>Csapatok</h1>
-			<Roster roster={roster} />
+
+			<ul>
+				{factions.map((f) => (
+					<li key={f.id}>{f.name}</li>
+				))}
+			</ul>
 		</div>
 	)
 }

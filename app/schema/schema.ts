@@ -28,7 +28,7 @@ export const eventTable = pgTable("event", {
 export type EventTableInsert = typeof eventTable.$inferInsert
 export type EventTableSelect = typeof eventTable.$inferSelect
 
-// players applied to the event
+// players registered up to the event
 export const registrationTable = pgTable("registration", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	userId: text().references(() => user.id, { onDelete: "set null" }),
@@ -37,6 +37,9 @@ export const registrationTable = pgTable("registration", {
 	createdAt: date().defaultNow().notNull(),
 	faction: text().default("null"),
 })
+
+
+
 
 export type RegistrationInsertType = typeof registrationTable.$inferInsert
 export type RegistrationSelectType = typeof registrationTable.$inferSelect
