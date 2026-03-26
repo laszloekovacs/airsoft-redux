@@ -1,53 +1,85 @@
-import type { RegistrationSelectType } from "~/schema/schema"
+import { eq } from "drizzle-orm"
+import expectOne from "~/functions/expectone"
+import { user } from "~/schema/auth-schema"
+import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
+import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/organizer.events.$eid.roster"
 
+// return faction information and registrations. registrations should be joined by ids. null means unasigned
 export async function loader({ params }: Route.LoaderArgs) {
-	const factions: Array<{ id: "string"; name: string }> = [
-		{
-			id: "string",
-			name: "alpha",
-		},
-		{
-			id: "string",
-			name: "bravo",
-		},
-	]
+	// get the relevant event
+	const events = await db
+		.select()
+		.from(eventTable)
+		.where(eq(eventTable.id, Number(params.eid)))
 
-	return { factions }
+	const event = expectOne(events)
+
+	// fetch the registrations relevant to this event, joined with users
+	const registrations = await db
+		.select()
+		.from(registrationTable)
+		.where(eq(registrationTable.eventId, Number(params.eid)))
+		.leftJoin(user, eq(user.id, registrationTable.userId))
+
+	// faction information.
+	const factions = await db
+		.select()
+		.from(factionsTable)
+		.where(eq(factionsTable.eventId, Number(params.eid)))
+
+	// TODO: possibly await with promise.all
+
+	return { registrations, event, factions }
 }
 
 // list all applicants
 export default function RosterPage({ loaderData }: Route.ComponentProps) {
-	const { factions } = loaderData
-
-	//const roster = factions.map()
+	const { registrations, event, factions } = loaderData
 
 	return (
 		<div>
-			<h1>Csapatok</h1>
+			<h1>{event.title}</h1>
+
+			{/* add the unasigned players */}
 
 			<ul>
 				{factions.map((f) => (
-					<li key={f.id}>{f.name}</li>
+					<li key={f.id}>
+						<Faction faction={f} registrations={registrations} />
+					</li>
 				))}
 			</ul>
 		</div>
 	)
 }
 
-const Roster = ({ roster }: { roster: RegistrationSelectType[] }) => {
-	const list = roster.map((i) => (
-		<li key={i.id}>
-			<div>{i.userId}</div>
-		</li>
-	))
+type FactionProps = {
+	faction: typeof factionsTable.$inferSelect
+	registrations: Array<{
+		registration: typeof registrationTable.$inferSelect
+		user: typeof user.$inferSelect | null
+	}>
+}
+
+const Faction = ({ faction, registrations }: FactionProps) => {
+	// filter out players belonging to this faction
+
+	const players = registrations.filter(
+		(pre) => pre.registration.factionId == faction.id,
+	)
 
 	return (
 		<div>
-			<p>list of players</p>
-			<div>
-				<ul>{list}</ul>
-			</div>
+			<h2>{faction.name}</h2>
+
+			<ul>
+				{players.map((p) => (
+					<li key={p.registration.id}>
+						<p>{p.registration.userId}</p>
+					</li>
+				))}
+			</ul>
 		</div>
 	)
 }
