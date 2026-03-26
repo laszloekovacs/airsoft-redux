@@ -42,6 +42,7 @@ export default function RosterPage({ loaderData }: Route.ComponentProps) {
 			<h1>{event.title}</h1>
 
 			{/* add the unasigned players */}
+			<Faction faction={null} registrations={registrations} />
 
 			<ul>
 				{factions.map((f) => (
@@ -55,7 +56,7 @@ export default function RosterPage({ loaderData }: Route.ComponentProps) {
 }
 
 type FactionProps = {
-	faction: typeof factionsTable.$inferSelect
+	faction: typeof factionsTable.$inferSelect | null
 	registrations: Array<{
 		registration: typeof registrationTable.$inferSelect
 		user: typeof user.$inferSelect | null
@@ -66,17 +67,17 @@ const Faction = ({ faction, registrations }: FactionProps) => {
 	// filter out players belonging to this faction
 
 	const players = registrations.filter(
-		(pre) => pre.registration.factionId == faction.id,
+		(pre) => pre.registration.factionId == faction?.id || null,
 	)
 
 	return (
 		<div>
-			<h2>{faction.name}</h2>
+			<h2>{faction?.name ?? "kispadosok"}</h2>
 
 			<ul>
 				{players.map((p) => (
 					<li key={p.registration.id}>
-						<p>{p.registration.userId}</p>
+						<p>{p.user?.name}</p>
 					</li>
 				))}
 			</ul>
