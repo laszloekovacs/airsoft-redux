@@ -67,7 +67,7 @@ const Faction = ({ faction, registrations }: FactionProps) => {
 	// filter out players belonging to this faction
 
 	const players = registrations.filter(
-		(pre) => pre.registration.factionId == faction?.id || null,
+		(pre) => pre.registration.factionId == faction?.id
 	)
 
 	return (
