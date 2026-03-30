@@ -13,21 +13,16 @@ const schema = z.object({
 	intent: z.enum(["applyAsOrganizer"]),
 })
 
-// TODO: handle user application state applied, accepted, rejected
 export async function loader({ request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
 
 	// look up application belonging to user
-	const usersApplication = await db
+	const [usersApplication] = await db
 		.select()
 		.from(organizerApplicationsTable)
 		.where(eq(organizerApplicationsTable.userId, user.id))
 
-	if (usersApplication.length != 0) {
-		return { status: usersApplication[0].status }
-	}
-
-	return { status: "available" } as const
+	return { usersApplication, user }
 }
 
 export default function ApplicationForm({
@@ -35,7 +30,7 @@ export default function ApplicationForm({
 	loaderData,
 }: Route.ComponentProps) {
 	const lastResult = actionData
-	const { status } = loaderData
+	const { usersApplication, user } = loaderData
 
 	const [form, fields] = useForm({
 		lastResult,
@@ -49,7 +44,7 @@ export default function ApplicationForm({
 		shouldRevalidate: "onBlur",
 	})
 
-	if (status == "pending") {
+	if (usersApplication?.status == "pending") {
 		return (
 			<div className="mt-4 border border-zinc-400 p-4 rounded-lg">
 				<p>már jelentkeztél szervezőnek</p>
@@ -58,7 +53,7 @@ export default function ApplicationForm({
 		)
 	}
 
-	if (status == "available")
+	if (usersApplication?.status == null)
 		return (
 			<div>
 				<h1>jelentkezz szervezonek</h1>
@@ -75,7 +70,8 @@ export default function ApplicationForm({
 			</div>
 		)
 
-	if (status == "accepted") {
+	// TODO: check if the user has permissions
+	if (user?.role == "organizer") {
 		return (
 			<div>
 				<p>már szervező vagy</p>
@@ -84,7 +80,7 @@ export default function ApplicationForm({
 		)
 	}
 
-	if (status == "rejected") {
+	if (usersApplication?.status == "rejected") {
 		return (
 			<div>
 				<p>jelentezésedet visszautasítottuk</p>

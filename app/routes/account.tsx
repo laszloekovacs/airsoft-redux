@@ -15,10 +15,18 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 	return (
 		<div className="flex flex-col min-h-screen px-6 py-6">
 			<PageHeader />
-			<h1>Felhasználó fiók</h1>
+			<h1 className="text-xl text-muted mb-6">Felhasználó fiók</h1>
 
-			<h2>{user.username}</h2>
-			<p>{user.email}</p>
+			<div className="mb-6">
+				<p>
+					<span className="text-muted">felhasznalo nev: </span>
+					<span>{user.username}</span>
+				</p>
+				<p>
+					<span className="text-muted">bejelentkezo email: </span>
+					<span>{user.email}</span>
+				</p>
+			</div>
 
 			<img
 				src={user.image ?? "https://picsum.photos/150/150"}
