@@ -8,8 +8,13 @@
 	/* --- design system --- */
 	--color-*: initial;
 
+	/* utilities */
+	--color-danger: #7e0000;
+	--color-info: rgb(116, 134, 11);
+	--color-success: #024418;
+
 	/* branding */
-	--color-brand: #111111;
+	--color-brand: #108d00;
 	--color-accent: #ffffff;
 
 	/* backgrounds */
@@ -22,24 +27,44 @@
 	--color-body: #1f1f1f;
 	--color-muted: #c9c9c9;
 
-	--radius-brand: 0.5rem;
-
-	--border-brand: 2px dashed;
-}
-
-html,
-body {
-	@apply bg-mauve-200;
-}
-
-input {
-	@apply border-2 border-amber-300;
-}
-
-button {
-	@apply border border-amber-300;
+	/* inputs */
+	--color-input-bg: #fff;
+	--color-input-border: #cbd5e1;
+	--color-focus-ring: #76a003;
 }
 
 div {
 	background-color: rgba(221, 0, 0, 0.02);
+}
+
+@layer components {
+	.input-field {
+		@apply block w-full px-3 py-1.5;
+		@apply bg-input-bg border border-input-border;
+
+		@apply text-body placeholder-muted;
+
+		@apply transition-all duration-150;
+
+		/* the "pro" focus style */
+		@apply focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10;
+
+		/* disabled state */
+		@apply disabled:bg-panel disabled:cursor-not-allowed disabled:opacity-75;
+	}
+
+	.input-label {
+		@apply block mb-1.5 text-sm font-medium text-heading;
+	}
+
+	/* button base style */
+	.btn {
+		@apply inline-flex items-center justify-center;
+		@apply px-5 py-2.5;
+		@apply text-sm font-semibold;
+		@apply transition-all duration-150 active:scale-95;
+
+		@apply cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+		@apply focus:outline-none focus:ring-4 focus:ring-brand/10;
+	}
 }
