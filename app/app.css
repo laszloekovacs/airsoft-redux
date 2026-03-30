@@ -19,13 +19,13 @@
 
 	/* backgrounds */
 	--color-surface: #333333;
-	--color-panel: #222222;
+	--color-panel: #535353;
 	--color-border: #666;
 
 	/* texts */
 	--color-heading: #1d1d1d;
 	--color-body: #1f1f1f;
-	--color-muted: #c9c9c9;
+	--color-muted: #636363;
 
 	/* inputs */
 	--color-input-bg: #fff;
@@ -66,5 +66,17 @@ div {
 
 		@apply cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
 		@apply focus:outline-none focus:ring-4 focus:ring-brand/10;
+	}
+
+	.btn-primary {
+		@apply bg-brand text-accent;
+		@apply hover:brightness-110 shadow-sm;
+		@apply focus:ring-brand/20;
+	}
+
+	.btn-secondary {
+		@apply border border-border text-body;
+		@apply hover:bg-border/50 hover:text-heading;
+		@apply focus:ring-border/50;
 	}
 }

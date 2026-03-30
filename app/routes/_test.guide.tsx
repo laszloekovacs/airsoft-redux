@@ -11,7 +11,10 @@ export default function StyleGuide() {
 				placeholder="you@example.com"
 			/>
 
-			<button type="submit" className="btn">
+			<button type="submit" className="btn btn-primary">
+				hello
+			</button>
+			<button type="submit" className="btn btn-secondary">
 				hello
 			</button>
 		</div>
