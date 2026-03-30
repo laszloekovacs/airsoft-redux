@@ -4,6 +4,27 @@
 	--font-sans:
 		"Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
 		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+	/* --- design system --- */
+	--color-*: initial;
+
+	/* branding */
+	--color-brand: #111111;
+	--color-accent: #ffffff;
+
+	/* backgrounds */
+	--color-surface: #333333;
+	--color-panel: #222222;
+	--color-border: #666;
+
+	/* texts */
+	--color-heading: #1d1d1d;
+	--color-body: #1f1f1f;
+	--color-muted: #c9c9c9;
+
+	--radius-brand: 0.5rem;
+
+	--border-brand: 2px dashed;
 }
 
 html,
