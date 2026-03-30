@@ -20,7 +20,7 @@
 	/* backgrounds */
 	--color-surface: #333333;
 	--color-panel: #535353;
-	--color-border: #666;
+	--color-border: #5e5e5e28;
 
 	/* texts */
 	--color-heading: #1d1d1d;
@@ -78,5 +78,9 @@ div {
 		@apply border border-border text-body;
 		@apply hover:bg-border/50 hover:text-heading;
 		@apply focus:ring-border/50;
+	}
+
+	.panel-border {
+		@apply border-2 border-border;
 	}
 }
