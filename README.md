@@ -25,3 +25,5 @@ Built with ❤️ using React Router.
 - https://hex.tech/
 - https://www.convex.dev/
 - https://signoz.io/
+- https://infisical.com/
+- https://trigger.dev/
