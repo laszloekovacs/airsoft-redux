@@ -3,5 +3,8 @@
         "source.organizeImports.biome": "always"
     },
     "editor.formatOnPaste": true,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    
+  "tailwindCSS.classFunctions": ["cva", "cx"]
+
 }
