@@ -4,7 +4,7 @@ import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/organizer.events.$eid._index"
+import type { Route } from "./+types/_app.organizer.events.$eid._index"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)

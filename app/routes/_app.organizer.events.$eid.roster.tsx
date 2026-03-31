@@ -3,7 +3,7 @@ import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/organizer.events.$eid.roster"
+import type { Route } from "./+types/_app.organizer.events.$eid.roster"
 
 // return faction information and registrations. registrations should be joined by ids. null means unasigned
 export async function loader({ params }: Route.LoaderArgs) {
@@ -67,7 +67,7 @@ const Faction = ({ faction, registrations }: FactionProps) => {
 	// filter out players belonging to this faction
 
 	const players = registrations.filter(
-		(pre) => pre.registration.factionId == faction?.id
+		(pre) => pre.registration.factionId == faction?.id,
 	)
 
 	return (
