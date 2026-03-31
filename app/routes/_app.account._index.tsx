@@ -6,7 +6,7 @@ import { z } from "zod"
 import requireSession from "~/functions/requiresession"
 import { organizerApplicationsTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/account._index"
+import type { Route } from "./+types/_app.account._index"
 
 const schema = z.object({
 	message: z.string({ error: "Kötelező kitölteni az üzenet mezőt" }),

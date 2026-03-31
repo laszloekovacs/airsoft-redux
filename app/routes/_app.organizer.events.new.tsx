@@ -6,7 +6,7 @@ import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/organizer.events.new"
+import type { Route } from "./+types/_app.organizer.events.new"
 
 const schema = z.object({
 	title: z

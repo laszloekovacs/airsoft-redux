@@ -1,4 +1,4 @@
-import { date, integer, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core"
+import { date, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
 
 export const loggingTable = pgTable("loggin", {
@@ -16,8 +16,6 @@ export const organizerApplicationsTable = pgTable("organizer_applications", {
 	status: statusEnum().notNull().default("pending"),
 	rejectionReason: text(),
 })
-export type OrganizerApplicationsSelect =
-	typeof organizerApplicationsTable.$inferSelect
 
 export const eventTable = pgTable("event", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -25,8 +23,6 @@ export const eventTable = pgTable("event", {
 	title: text().notNull(),
 	createdAt: date().defaultNow().notNull(),
 })
-export type EventTableInsert = typeof eventTable.$inferInsert
-export type EventTableSelect = typeof eventTable.$inferSelect
 
 // players registered up to the event
 export const registrationTable = pgTable("registration", {
@@ -37,9 +33,6 @@ export const registrationTable = pgTable("registration", {
 	createdAt: date().defaultNow().notNull(),
 	factionId: integer().references(()=> factionsTable.id, {onDelete: "set null"})
 })
-
-export type RegistrationInsertType = typeof registrationTable.$inferInsert
-export type RegistrationSelectType = typeof registrationTable.$inferSelect
 
 // factions per event 
 export const factionsTable = pgTable("factions", {

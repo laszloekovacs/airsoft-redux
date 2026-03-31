@@ -2,7 +2,7 @@ import { Outlet } from "react-router"
 import { PageHeader } from "~/components/header"
 import requireSession from "~/functions/requiresession"
 import { auth } from "~/services/auth.server"
-import type { Route } from "./+types/organizer"
+import type { Route } from "./+types/_app.organizer"
 
 export async function loader({ request }: Route.LoaderArgs) {
 	// route guard
@@ -30,8 +30,7 @@ export default function OrganizerPage({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div>
-			<PageHeader />
-			<h1>Szervező oldal</h1>
+			<h1 className="text-body text-2xl mb-4">Szervező oldal</h1>
 			<Outlet context={user} />
 		</div>
 	)
