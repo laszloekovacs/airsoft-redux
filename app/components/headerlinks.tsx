@@ -1,4 +1,4 @@
-import { Link } from "react-router"
+import { NavLink } from "react-router"
 
 type LinkProps = {
 	isOrganizer: boolean
@@ -8,10 +8,10 @@ type LinkProps = {
 export const HeaderLinks = ({ isOrganizer, isAdmin }: LinkProps) => {
 	return (
 		<div className="flex flex-row gap-8 py-6">
-			<Link to="/">home</Link>
-			<Link to="/account">profil</Link>
-			{isOrganizer && <Link to="/organizer">szervező</Link>}
-			{isAdmin && <Link to="/admin">admin</Link>}
+			<NavLink to="/">home</NavLink>
+			<NavLink to="/account">profil</NavLink>
+			{isOrganizer && <NavLink to="/organizer">szervező</NavLink>}
+			{isAdmin && <NavLink to="/admin">admin</NavLink>}
 		</div>
 	)
 }
