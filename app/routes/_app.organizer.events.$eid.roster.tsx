@@ -1,4 +1,6 @@
+import { signal } from "@preact/signals-react"
 import { eq } from "drizzle-orm"
+import { useState } from "react"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
@@ -42,15 +44,17 @@ export default function RosterPage({ loaderData }: Route.ComponentProps) {
 			<h1>{event.title}</h1>
 
 			{/* add the unasigned players */}
-			<Faction faction={null} registrations={registrations} />
+			<RegistrationContainer>
+				<Faction faction={null} registrations={registrations} />
 
-			<ul>
-				{factions.map((f) => (
-					<li key={f.id}>
-						<Faction faction={f} registrations={registrations} />
-					</li>
-				))}
-			</ul>
+				<ul>
+					{factions.map((f) => (
+						<li key={f.id}>
+							<Faction faction={f} registrations={registrations} />
+						</li>
+					))}
+				</ul>
+			</RegistrationContainer>
 		</div>
 	)
 }
@@ -72,15 +76,53 @@ const Faction = ({ faction, registrations }: FactionProps) => {
 
 	return (
 		<div>
-			<h2>{faction?.name ?? "kispadosok"}</h2>
+			<h2 className="text-body">{faction?.name ?? "kispadosok"}</h2>
 
-			<ul>
+			<ul className="border-b border-border">
 				{players.map((p) => (
 					<li key={p.registration.id}>
-						<p>{p.user?.name}</p>
+						<RegistrationListItem
+							username={p.user?.username ?? null}
+							id={p.registration.id}
+							isChecked={true}
+							onChange={() => {}}
+						/>
 					</li>
 				))}
 			</ul>
 		</div>
 	)
+}
+
+type ListItemProp = {
+	id: number
+	username: string | null
+	isChecked: boolean
+	onChange: (id: number) => void
+}
+
+// list item
+const RegistrationListItem = ({
+	id,
+	username,
+	isChecked,
+	onChange,
+}: ListItemProp) => {
+	return (
+		<div>
+			<input
+				type="checkbox"
+				checked={isChecked}
+				onChange={() => onChange(id)}
+			></input>
+			<span>{username}</span>
+		</div>
+	)
+}
+
+// holds action logic
+const RegistrationContainer = ({ children }: { children: React.ReactNode }) => {
+	const [selected, setSelected] = useState(new Set())
+
+	return <div>{children}</div>
 }

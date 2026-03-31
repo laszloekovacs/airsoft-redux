@@ -13,6 +13,7 @@
   "dependencies": {
     "@conform-to/react": "^1.17.1",
     "@conform-to/zod": "^1.17.1",
+    "@preact/signals-react": "^3.10.0",
     "@react-router/fs-routes": "^7.13.2",
     "@react-router/node": "7.13.1",
     "@react-router/serve": "^7.13.2",
