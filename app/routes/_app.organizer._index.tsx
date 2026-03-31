@@ -22,7 +22,7 @@ export default function OrganizerPage({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div>
-			<p>eseményeid</p>
+			<h2 className="text-muted text-xl mb-4">Általad szervezett események</h2>
 			<OrganizersEventList events={events} />
 		</div>
 	)
