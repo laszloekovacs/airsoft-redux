@@ -1,11 +1,11 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
-import { and, eq } from "drizzle-orm"
+import { and, asc, eq } from "drizzle-orm"
 import { useFetcher } from "react-router"
 import z from "zod"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
-import { eventTable, registrationTable } from "~/schema/schema"
+import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.event.$id"
 
@@ -73,7 +73,7 @@ const ApplicationForm = ({ isRegistered }: { isRegistered: boolean }) => {
 	return (
 		<div>
 			<fetcher.Form method="post" {...getFormProps(form)}>
-				<label htmlFor={fields.message.id}>uzenet</label>
+				<label htmlFor={fields.message.id}>Üzenet</label>
 				<input {...getInputProps(fields.message, { type: "text" })} />
 				<input {...getInputProps(fields.intent, { type: "hidden" })} />
 				<button type="submit">jelentkezek</button>
@@ -92,7 +92,19 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 	try {
 		// insert player into the roster
-		// look out for reinsertion
+		// TODO: transaction
+
+		// find the index of the default (0) faction in the event
+		const [faction] = await db
+			.select()
+			.from(factionsTable)
+			.where(
+				and(
+					eq(factionsTable.eventId, Number(params.id)),
+					eq(factionsTable.order, 0),
+				),
+			)
+
 		// the page gets revalidated, so loader should indicate success and doesnt need to
 		// return any data trough comform, onConflictDoNothing will skip insertion
 		await db
@@ -101,6 +113,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 				userId: user.id,
 				eventId: Number(params.id),
 				message: submission.value.message ?? null,
+				factionId: faction.id,
 			})
 			.onConflictDoNothing()
 

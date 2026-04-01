@@ -1,4 +1,11 @@
-import { date, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core"
+import {
+	boolean,
+	date,
+	integer,
+	pgEnum,
+	pgTable,
+	text,
+} from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
 
 export const loggingTable = pgTable("loggin", {
@@ -43,4 +50,7 @@ export const factionsTable = pgTable("factions", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	eventId: integer().references(() => eventTable.id, { onDelete: "cascade" }),
 	name: text().notNull(),
+
+	// sorting order, 0 is reserved for the default team
+	order: integer().notNull().default(0),
 })
