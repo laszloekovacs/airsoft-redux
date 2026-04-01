@@ -13,7 +13,7 @@ import type { Route } from "./+types/_app.organizer.events.$eid.roster"
 // TODO: only the owner should be able to edit his own roster
 const assignmentSchema = z.object({
 	selected: z.number().array(),
-	factionId: z.number().nullable(),
+	factionId: z.union([z.coerce.number(), z.null()]),
 	intent: z.enum(["assign"]),
 })
 
@@ -26,6 +26,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, { schema: assignmentSchema })
 
+	console.log(submission)
 	if (submission.status != "success") {
 		return submission.reply()
 	}
@@ -34,6 +35,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 	if (submission.value.intent == "assign") {
 		// modify registration's factionId to the submitted value
 		// where the registration's id is in the submitted list
+
 		const updatedRows = await db
 			.update(registrationTable)
 			.set({
@@ -152,12 +154,15 @@ const FactionHeading = ({
 
 	const payload: Assignment = {
 		selected: Array.from(selected),
-		factionId,
+		factionId: factionId,
 		intent: "assign",
 	}
 
 	const onReasign = async () => {
-		await fetcher.submit(payload, { method: "post" })
+		await fetcher.submit(payload, {
+			method: "post",
+			encType: "multipart/form-data",
+		})
 	}
 
 	return (
