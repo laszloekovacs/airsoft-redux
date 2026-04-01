@@ -71,7 +71,19 @@ const RegistrationContainer = ({
 		})
 	}
 
-	return <div></div>
+	return (
+		<div>
+			{factions.map((f) => (
+				<Faction
+					key={f.id}
+					faction={f}
+					registrations={registrations}
+					selected={selected}
+					onToggle={toggle}
+				/>
+			))}
+		</div>
+	)
 }
 
 type FactionProps = {
@@ -80,9 +92,16 @@ type FactionProps = {
 		registration: typeof registrationTable.$inferSelect
 		user: typeof user.$inferSelect | null
 	}>
+	selected: Set<number>
+	onToggle: (id: number) => void
 }
 
-const Faction = ({ faction, registrations }: FactionProps) => {
+const Faction = ({
+	faction,
+	registrations,
+	selected,
+	onToggle,
+}: FactionProps) => {
 	// filter out players belonging to this faction
 
 	const players = registrations.filter(
