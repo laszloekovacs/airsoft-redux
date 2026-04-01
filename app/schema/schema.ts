@@ -1,4 +1,11 @@
-import { date, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core"
+import {
+	boolean,
+	date,
+	integer,
+	pgEnum,
+	pgTable,
+	text,
+} from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
 
 export const loggingTable = pgTable("loggin", {
@@ -22,21 +29,28 @@ export const eventTable = pgTable("event", {
 	userId: text().references(() => user.id, { onDelete: "set null" }),
 	title: text().notNull(),
 	createdAt: date().defaultNow().notNull(),
+	deletedAt: date(),
 })
 
 // players registered up to the event
 export const registrationTable = pgTable("registration", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	userId: text().references(() => user.id, { onDelete: "set null" }),
-	eventId: integer().references(() => eventTable.id, { onDelete: "set null" }),
+	eventId: integer().references(() => eventTable.id, { onDelete: "cascade" }),
 	message: text(),
 	createdAt: date().defaultNow().notNull(),
-	factionId: integer().references(()=> factionsTable.id, {onDelete: "set null"})
+	factionId: integer()
+		.references(() => factionsTable.id)
+		.notNull(),
 })
 
-// factions per event 
+// factions per event
+// TODO: names should be unique per event
 export const factionsTable = pgTable("factions", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
-	eventId: integer().references(()=> eventTable.id, {onDelete: "cascade"}),
-	name: text().notNull().unique()
+	eventId: integer().references(() => eventTable.id, { onDelete: "cascade" }),
+	name: text().notNull(),
+
+	// sorting order, 0 is reserved for the default team
+	order: integer().notNull().default(0),
 })

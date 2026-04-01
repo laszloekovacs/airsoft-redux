@@ -4,7 +4,7 @@ import { Form, redirect } from "react-router"
 import z from "zod"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
-import { eventTable } from "~/schema/schema"
+import { eventTable, factionsTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.new"
 
@@ -52,6 +52,7 @@ export async function action({ request }: Route.ActionArgs) {
 		return submission.reply()
 	}
 
+	// TODO: transaction
 	// create an event in the database with a provided name
 	const result = await db
 		.insert(eventTable)
@@ -61,10 +62,17 @@ export async function action({ request }: Route.ActionArgs) {
 		})
 		.returning()
 
-	expectOne(result, {
+	const event = expectOne(result, {
 		notFound() {
 			throw new Error("nem sikerult az esemenyt letrehozni!")
 		},
+	})
+
+	// create the default faction
+	await db.insert(factionsTable).values({
+		name: "kispadosok",
+		order: 0,
+		eventId: event.id,
 	})
 
 	return redirect(`/organizer/events/${result[0].id}`)
