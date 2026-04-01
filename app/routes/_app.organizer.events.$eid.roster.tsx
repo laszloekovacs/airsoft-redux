@@ -13,7 +13,7 @@ import type { Route } from "./+types/_app.organizer.events.$eid.roster"
 // TODO: only the owner should be able to edit his own roster
 const assignmentSchema = z.object({
 	selected: z.number().array(),
-	factionId: z.union([z.coerce.number(), z.null()]),
+	factionId: z.number(),
 	intent: z.enum(["assign"]),
 })
 
@@ -119,13 +119,6 @@ const RegistrationContainer = ({
 
 	return (
 		<div>
-			<Faction
-				faction={null}
-				registrations={registrations}
-				selected={selected}
-				onToggle={toggle}
-				fetcher={fetcher}
-			/>
 			{factions.map((f) => (
 				<Faction
 					key={f.id}
@@ -148,7 +141,7 @@ const FactionHeading = ({
 }: {
 	fetcher: ReturnType<typeof useFetcher>
 	selected: Set<number>
-	factionId: number | null
+	factionId: number
 }) => {
 	const isSelecting = !!selected.size
 
@@ -177,7 +170,7 @@ const FactionHeading = ({
 }
 
 type FactionProps = {
-	faction: typeof factionsTable.$inferSelect | null
+	faction: typeof factionsTable.$inferSelect
 	registrations: Array<{
 		registration: typeof registrationTable.$inferSelect
 		user: typeof user.$inferSelect | null
@@ -205,7 +198,11 @@ const Faction = ({
 	return (
 		<div>
 			<h2 className="text-body">{faction?.name ?? "kispadosok"}</h2>
-			<FactionHeading fetcher={fetcher} selected={selected} factionId={null} />
+			<FactionHeading
+				factionId={faction.id}
+				fetcher={fetcher}
+				selected={selected}
+			/>
 			<ul className="border-b border-border">
 				{players.map((p) => (
 					<li key={p.registration.id}>
@@ -222,7 +219,7 @@ const Faction = ({
 	)
 }
 
-type ListItemProp = {
+type RegistrationListItemProp = {
 	id: number
 	username: string | null
 	isChecked: boolean
@@ -235,7 +232,7 @@ const RegistrationListItem = ({
 	username,
 	isChecked,
 	onToggle,
-}: ListItemProp) => {
+}: RegistrationListItemProp) => {
 	return (
 		<div>
 			<input
