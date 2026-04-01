@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm"
+import { useState } from "react"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
@@ -60,6 +61,16 @@ const RegistrationContainer = ({
 	registrations,
 	factions,
 }: RegistrationContainerProps) => {
+	const [selected, setSelected] = useState<Set<number>>(new Set())
+
+	const toggle = (id: number) => {
+		setSelected((prev) => {
+			const next = new Set(prev)
+			next.has(id) ? next.delete(id) : next.add(id)
+			return next
+		})
+	}
+
 	return <div></div>
 }
 
