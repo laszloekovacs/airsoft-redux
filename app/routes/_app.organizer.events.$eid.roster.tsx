@@ -1,6 +1,4 @@
-import { signal } from "@preact/signals-react"
 import { eq } from "drizzle-orm"
-import { useState } from "react"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
@@ -31,7 +29,6 @@ export async function loader({ params }: Route.LoaderArgs) {
 		.where(eq(factionsTable.eventId, Number(params.eid)))
 
 	// TODO: possibly await with promise.all
-
 	return { registrations, event, factions }
 }
 
@@ -43,20 +40,27 @@ export default function RosterPage({ loaderData }: Route.ComponentProps) {
 		<div>
 			<h1>{event.title}</h1>
 
-			{/* add the unasigned players */}
-			<RegistrationContainer>
-				<Faction faction={null} registrations={registrations} />
-
-				<ul>
-					{factions.map((f) => (
-						<li key={f.id}>
-							<Faction faction={f} registrations={registrations} />
-						</li>
-					))}
-				</ul>
-			</RegistrationContainer>
+			<RegistrationContainer
+				registrations={registrations}
+				factions={factions}
+			/>
 		</div>
 	)
+}
+
+type RegistrationContainerProps = {
+	factions: Array<typeof factionsTable.$inferSelect>
+	registrations: Array<{
+		registration: typeof registrationTable.$inferSelect
+		user: typeof user.$inferSelect | null
+	}>
+}
+
+const RegistrationContainer = ({
+	registrations,
+	factions,
+}: RegistrationContainerProps) => {
+	return <div></div>
 }
 
 type FactionProps = {
@@ -118,11 +122,4 @@ const RegistrationListItem = ({
 			<span>{username}</span>
 		</div>
 	)
-}
-
-// holds action logic
-const RegistrationContainer = ({ children }: { children: React.ReactNode }) => {
-	const [selected, setSelected] = useState(new Set())
-
-	return <div>{children}</div>
 }
