@@ -103,10 +103,12 @@ const Faction = ({
 	onToggle,
 }: FactionProps) => {
 	// filter out players belonging to this faction
-
 	const players = registrations.filter(
-		(pre) => pre.registration.factionId == faction?.id,
+		(r) => r.registration.factionId == faction?.id,
 	)
+
+	// TODO: render the header only with the assign button
+	if (players.length == 0) return null
 
 	return (
 		<div>
@@ -116,10 +118,10 @@ const Faction = ({
 				{players.map((p) => (
 					<li key={p.registration.id}>
 						<RegistrationListItem
-							username={p.user?.username ?? null}
 							id={p.registration.id}
-							isChecked={true}
-							onChange={() => {}}
+							username={p.user?.username ?? null}
+							isChecked={selected.has(p.registration.id)}
+							onToggle={onToggle}
 						/>
 					</li>
 				))}
@@ -132,7 +134,7 @@ type ListItemProp = {
 	id: number
 	username: string | null
 	isChecked: boolean
-	onChange: (id: number) => void
+	onToggle: (id: number) => void
 }
 
 // list item
@@ -140,16 +142,16 @@ const RegistrationListItem = ({
 	id,
 	username,
 	isChecked,
-	onChange,
+	onToggle,
 }: ListItemProp) => {
 	return (
 		<div>
 			<input
 				type="checkbox"
 				checked={isChecked}
-				onChange={() => onChange(id)}
-			></input>
-			<span>{username}</span>
+				onChange={() => onToggle(id)}
+			/>
+			<span>{username ?? "ismeretlen"}</span>
 		</div>
 	)
 }
