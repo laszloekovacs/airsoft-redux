@@ -1,10 +1,52 @@
-import { eq } from "drizzle-orm"
+import { parseWithZod } from "@conform-to/zod/v4"
+import { eq, inArray } from "drizzle-orm"
 import { useState } from "react"
+import { useFetcher } from "react-router"
+import z from "zod"
+import { requireRole } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.$eid.roster"
+
+// TODO: only the owner should be able to edit his own roster
+const assignmentSchema = z.object({
+	selected: z.number().array(),
+	factionId: z.number().nullable(),
+	intent: z.enum(["assign"]),
+})
+
+type Assignment = z.infer<typeof assignmentSchema>
+
+export async function action({ params, request }: Route.ActionArgs) {
+	const { user } = await requireRole(request, "organizer")
+	// TODO: check if this is the users event
+
+	const formData = await request.formData()
+	const submission = parseWithZod(formData, { schema: assignmentSchema })
+
+	if (submission.status != "success") {
+		return submission.reply()
+	}
+
+	// check for intent of assign, modify registrations
+	if (submission.value.intent == "assign") {
+		// modify registration's factionId to the submitted value
+		// where the registration's id is in the submitted list
+		const updatedRows = await db
+			.update(registrationTable)
+			.set({
+				factionId: submission.value.factionId,
+			})
+			.where(inArray(registrationTable.id, submission.value.selected))
+			.returning()
+
+		console.log(updatedRows)
+	}
+
+	return submission.reply()
+}
 
 // return faction information and registrations. registrations should be joined by ids. null means unasigned
 export async function loader({ params }: Route.LoaderArgs) {
@@ -62,6 +104,8 @@ const RegistrationContainer = ({
 	factions,
 }: RegistrationContainerProps) => {
 	const [selected, setSelected] = useState<Set<number>>(new Set())
+	// might want to use fetchers to indicate loading instead of passing the same one?
+	const fetcher = useFetcher()
 
 	const toggle = (id: number) => {
 		setSelected((prev) => {
@@ -73,6 +117,13 @@ const RegistrationContainer = ({
 
 	return (
 		<div>
+			<Faction
+				faction={null}
+				registrations={registrations}
+				selected={selected}
+				onToggle={toggle}
+				fetcher={fetcher}
+			/>
 			{factions.map((f) => (
 				<Faction
 					key={f.id}
@@ -80,8 +131,42 @@ const RegistrationContainer = ({
 					registrations={registrations}
 					selected={selected}
 					onToggle={toggle}
+					fetcher={fetcher}
 				/>
 			))}
+		</div>
+	)
+}
+
+// TODO: FactionHeading component with assign button and count
+const FactionHeading = ({
+	fetcher,
+	selected,
+	factionId,
+}: {
+	fetcher: ReturnType<typeof useFetcher>
+	selected: Set<number>
+	factionId: number | null
+}) => {
+	const isSelecting = !!selected.size
+
+	const payload: Assignment = {
+		selected: Array.from(selected),
+		factionId,
+		intent: "assign",
+	}
+
+	const onReasign = async () => {
+		await fetcher.submit(payload, { method: "post" })
+	}
+
+	return (
+		<div className="px-2 flex flex-row gap-4">
+			<p>fejléc</p>
+			{isSelecting && <p>selecting</p>}
+			<button type="button" disabled={!isSelecting} onClick={() => onReasign()}>
+				hozzáad
+			</button>
 		</div>
 	)
 }
@@ -94,6 +179,7 @@ type FactionProps = {
 	}>
 	selected: Set<number>
 	onToggle: (id: number) => void
+	fetcher: ReturnType<typeof useFetcher>
 }
 
 const Faction = ({
@@ -101,6 +187,7 @@ const Faction = ({
 	registrations,
 	selected,
 	onToggle,
+	fetcher,
 }: FactionProps) => {
 	// filter out players belonging to this faction
 	const players = registrations.filter(
@@ -113,7 +200,7 @@ const Faction = ({
 	return (
 		<div>
 			<h2 className="text-body">{faction?.name ?? "kispadosok"}</h2>
-
+			<FactionHeading fetcher={fetcher} selected={selected} factionId={null} />
 			<ul className="border-b border-border">
 				{players.map((p) => (
 					<li key={p.registration.id}>
