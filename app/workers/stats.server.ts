@@ -1,9 +1,12 @@
 import { Queue, Worker } from "bunqueue/client"
 
-console.log("stats is running")
+type TaskData = {
+	message: string
+}
+
 // both should be embedded: true
 // the name of the queue and the worker establises the connection between the 2
-const queue = new Queue("test", { embedded: true })
+const queue = new Queue<TaskData>("test", { embedded: true })
 const worker = new Worker(
 	"test",
 	async (job) => {
