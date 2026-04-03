@@ -1,5 +1,5 @@
 import { Link } from "react-router"
-import { type EventTableSelect, eventTable } from "~/schema/schema"
+import { eventTable } from "~/schema/schema"
 import type { SessionData } from "~/services/auth.server"
 import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
@@ -48,7 +48,11 @@ const SessionInfo = ({ session }: { session: SessionData | null }) => {
 }
 
 // list events
-const EventList = ({ events }: { events?: EventTableSelect[] }) => {
+const EventList = ({
+	events,
+}: {
+	events?: (typeof eventTable.$inferSelect)[]
+}) => {
 	if (!events || events?.length == 0) {
 		return <div>nincs aktualis esemeny</div>
 	}
