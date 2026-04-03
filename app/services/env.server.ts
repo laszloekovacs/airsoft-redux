@@ -12,7 +12,9 @@ const envSchema = z.object({
 	DATABASE_URL: z.string().default(defaultConnectionString),
 	BETTER_AUTH_SECRET: z.string().min(32).default(defaultAuthSecret),
 	BETTER_AUTH_URL: z.string().default(defaultAuthUrl),
-	STORAGE_DRIVER: z.enum(["picsum"]).default(defaultStorageDriver)
+	STORAGE_DRIVER: z.enum(["picsum"]).default(defaultStorageDriver),
+	TYPESENSE_HOST: z.string(),
+	TYPESENSE_APIKEY: z.string(),
 })
 
 const _env = envSchema.parse(process.env)
