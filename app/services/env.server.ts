@@ -15,6 +15,7 @@ const envSchema = z.object({
 	STORAGE_DRIVER: z.enum(["picsum"]).default(defaultStorageDriver),
 	TYPESENSE_HOST: z.string(),
 	TYPESENSE_APIKEY: z.string(),
+	CAP_CONNECTION_STRING: z.string(),
 })
 
 const _env = envSchema.parse(process.env)

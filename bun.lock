@@ -5,6 +5,7 @@
     "": {
       "name": "airsoft-redux",
       "dependencies": {
+        "@cap.js/widget": "^0.1.43",
         "@conform-to/react": "^1.17.1",
         "@conform-to/zod": "^1.17.1",
         "@preact/signals-react": "^3.10.0",
@@ -138,6 +139,8 @@
     "@biomejs/cli-win32-arm64": ["@biomejs/cli-win32-arm64@2.4.9", "", { "os": "win32", "cpu": "arm64" }, "sha512-aDZr0RBC3sMGJOU10BvG7eZIlWLK/i51HRIfScE2lVhfts2dQTreowLiJJd+UYg/tHKxS470IbzpuKmd0MiD6g=="],
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.4.9", "", { "os": "win32", "cpu": "x64" }, "sha512-NS4g/2G9SoQ4ktKtz31pvyc/rmgzlcIDCGU/zWbmHJAqx6gcRj2gj5Q/guXhoWTzCUaQZDIqiCQXHS7BcGYc0w=="],
+
+    "@cap.js/widget": ["@cap.js/widget@0.1.43", "", {}, "sha512-VYfYIbsLH49UPhwKr4W2oW+Vu358gZJencWQ9PLlWzMw6/QlYi2GpVaSYndHOvb3Z7fK3OrQa9L65FrM4esdoA=="],
 
     "@conform-to/dom": ["@conform-to/dom@1.17.1", "", {}, "sha512-vpwCodVVWpQ6kbrlu5F85BC99ozDxqcrhmt+YDD81bCwvt6NtiycFID3NQQGQyn+bzmpb4qlF3Ay9YcljnrNHw=="],
 
