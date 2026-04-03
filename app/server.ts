@@ -18,4 +18,6 @@ app.get("/health", (c) =>
 // First, create the React Router server (adds asset serving + SSR catch-all `*`)
 const server = await createHonoServer({ app })
 
+// might want to start queues here
+
 export default server
