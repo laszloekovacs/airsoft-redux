@@ -37,6 +37,11 @@ div {
 	background-color: rgba(221, 0, 0, 0.02);
 }
 
+body {
+	background-color: rgb(255, 252, 252);
+	color: rgb(67, 57, 76);
+}
+
 @layer components {
 	.input-field {
 		@apply block w-full px-3 py-1.5;
