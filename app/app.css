@@ -38,8 +38,9 @@ div {
 }
 
 body {
-	background-color: rgb(255, 252, 252);
+	background-color: rgb(186, 183, 183);
 	color: rgb(67, 57, 76);
+	font-size: 14px;
 }
 
 @layer components {
