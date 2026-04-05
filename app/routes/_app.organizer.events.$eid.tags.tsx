@@ -33,13 +33,18 @@ export default function TagsPage({ loaderData }: Route.ComponentProps) {
 
 	const { event } = loaderData
 
+	// TODO: on success clear form
+
 	return (
 		<div>
 			<h2>kereső tag-ek</h2>
 
-			<ul>
+			<ul className="flex flex-row gap-4 ">
 				{event.tags.map((item) => (
-					<li key={item}>{item}</li>
+					<li key={item}>
+						<p className="bg-border">{item}</p>
+						{/* remove form with intent button and eventid */}
+					</li>
 				))}
 			</ul>
 
