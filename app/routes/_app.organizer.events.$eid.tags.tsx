@@ -29,6 +29,10 @@ export default function TagsPage({ loaderData }: Route.ComponentProps) {
 	const [form, field] = useForm({
 		lastResult: fetcher.data,
 		constraint: getZodConstraint(schema),
+		shouldRevalidate: "onSubmit",
+		onValidate({ formData }) {
+			return parseWithZod(formData, { schema })
+		},
 	})
 
 	const { event } = loaderData
@@ -39,14 +43,7 @@ export default function TagsPage({ loaderData }: Route.ComponentProps) {
 		<div>
 			<h2>kereső tag-ek</h2>
 
-			<ul className="flex flex-row gap-4 ">
-				{event.tags.map((item) => (
-					<li key={item}>
-						<p className="bg-border">{item}</p>
-						{/* remove form with intent button and eventid */}
-					</li>
-				))}
-			</ul>
+			<SearchTags tags={event.tags} />
 
 			<fetcher.Form method="post" {...getFormProps(form)}>
 				<input
@@ -72,8 +69,11 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
 	const submission = parseWithZod(formData, { schema })
 
 	if (submission.status != "success") {
+		console.log("failed to parse", submission)
 		return submission.reply()
 	}
+
+	console.log(submission)
 
 	if (submission.value.intent === "addTag") {
 		await db
@@ -87,6 +87,8 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
             `,
 			})
 			.where(eq(eventTable.id, Number(params.eid)))
+
+		return submission.reply({ resetForm: true })
 	}
 
 	if (submission.value.intent == "removeTag") {
@@ -99,4 +101,30 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
 	}
 
 	return submission.reply()
+}
+
+const SearchTags = ({ tags }: { tags: string[] }) => {
+	const fetcher = useFetcher()
+	const [form] = useForm({
+		lastResult: fetcher.data,
+		constraint: getZodConstraint(schema),
+	})
+
+	return (
+		<ul className="flex flex-row gap-4 ">
+			{tags.map((item) => (
+				<li key={item}>
+					<p className="bg-border">{item}</p>
+					{/* remove form with intent button and eventid */}
+					<fetcher.Form method="post" {...getFormProps(form)}>
+						<input type="hidden" name="tag" value={item} />
+
+						<button type="submit" name="intent" value="removeTag">
+							<span>remove</span>
+						</button>
+					</fetcher.Form>
+				</li>
+			))}
+		</ul>
+	)
 }
