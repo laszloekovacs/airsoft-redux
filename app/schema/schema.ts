@@ -1,11 +1,5 @@
-import {
-	boolean,
-	date,
-	integer,
-	pgEnum,
-	pgTable,
-	text,
-} from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
+import { date, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
 
 export const loggingTable = pgTable("loggin", {
@@ -28,6 +22,10 @@ export const eventTable = pgTable("event", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
 	userId: text().references(() => user.id, { onDelete: "set null" }),
 	title: text().notNull(),
+
+	// string array for filter and search
+	tags: text().array().notNull().default(sql`ARRAY[]::text[]`),
+
 	createdAt: date().defaultNow().notNull(),
 	deletedAt: date(),
 })
