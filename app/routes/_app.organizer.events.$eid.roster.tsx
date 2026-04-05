@@ -1,17 +1,19 @@
-import { parseWithZod } from "@conform-to/zod/v4"
+import { getFormProps, getInputProps, useForm } from "@conform-to/react"
+import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
+import { useFetcher } from "react-router"
+import z from "zod"
 import { requireRole } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
+import { user } from "~/schema/auth-schema"
 import { eventTable, registrationTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.$eid.roster"
-import z from "zod"
-import { user } from "~/schema/auth-schema"
 
 const assignmentSchema = z.object({
-	userId: z.number().int(),
-	faction: z.string(),
-	intent: z.enum(["assign"]),
+	regId: z.coerce.number(),
+	faction: z.string().nullable().optional(),
+	intent: z.enum(["assignToFaction"]),
 })
 
 export async function action({ params, request }: Route.ActionArgs) {
@@ -26,8 +28,12 @@ export async function action({ params, request }: Route.ActionArgs) {
 	}
 
 	// check for intent of assign, modify registrations
-	if (submission.value.intent == "assign") {
-		console.log("reassign")
+	if (submission.value.intent == "assignToFaction") {
+		// TODO: use registration id not user id
+		await db
+			.update(registrationTable)
+			.set({ faction: submission.value.faction ?? null })
+			.where(eq(registrationTable.id, submission.value.regId))
 	}
 
 	return submission.reply()
@@ -68,18 +74,25 @@ export default function RosterPage({ loaderData }: Route.ComponentProps) {
 }
 
 type RowType = {
-	user: typeof user.$inferInsert | null
+	user: typeof user.$inferSelect | null
 	registration: typeof registrationTable.$inferSelect
 }
 
 const Registrations = ({ registrations }: { registrations: RowType[] }) => {
+	// gather existing factions
+	const factions = [
+		...new Set(
+			registrations.map((r) => r.registration.faction).filter(Boolean),
+		),
+	] as string[]
+
 	return (
 		<div>
-			<span>Esemenyre regisztraltak</span>
+			<span>Eseményre regisztráltak</span>
 			<ul>
 				{registrations.map((r) => (
 					<li key={r.registration.id}>
-						<RegistrationsRow reg={r} />
+						<RegistrationsRow reg={r} factions={factions} />
 					</li>
 				))}
 			</ul>
@@ -87,11 +100,45 @@ const Registrations = ({ registrations }: { registrations: RowType[] }) => {
 	)
 }
 
-const RegistrationsRow = ({ reg }: { reg: RowType }) => {
+const RegistrationsRow = ({
+	reg,
+	factions,
+}: {
+	reg: RowType
+	factions: string[]
+}) => {
+	const fetcher = useFetcher()
+
+	const [form, field] = useForm({
+		lastResult: fetcher.data,
+		constraint: getZodConstraint(assignmentSchema),
+		defaultValue: {
+			regId: reg.registration.id,
+			faction: reg.registration.faction,
+			intent: "assignToFaction",
+		},
+	})
+
 	return (
 		<div>
+			{fetcher?.data && <p>frissítve</p>}
 			<p>{reg.user?.username || "classified"}</p>
-			<p>{reg.registration.faction}</p>
+
+			<fetcher.Form method="POST" {...getFormProps(form)}>
+				<div className="flex flex-row gap-4 max-w-sm">
+					<input {...getInputProps(field.regId, { type: "hidden" })} />
+					<input {...getInputProps(field.intent, { type: "hidden" })} />
+
+					<input
+						className="input-field"
+						{...getInputProps(field.faction, { type: "text" })}
+					/>
+
+					<button className="btn btn-primary" type="submit">
+						<span>módosít</span>
+					</button>
+				</div>
+			</fetcher.Form>
 		</div>
 	)
 }

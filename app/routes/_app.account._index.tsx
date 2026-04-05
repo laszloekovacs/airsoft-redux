@@ -46,7 +46,7 @@ export default function ApplicationForm({
 
 	if (usersApplication?.status == "pending") {
 		return (
-			<div className="mt-4 border border-zinc-400 p-4 rounded-lg">
+			<div>
 				<p>már jelentkeztél szervezőnek</p>
 				<p>jelentkezésed elbírálás alatt van</p>
 			</div>

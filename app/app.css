@@ -32,11 +32,12 @@
 	--color-input-border: #cbd5e1;
 	--color-focus-ring: #76a003;
 }
-
-body {
-	background-color: rgb(255, 252, 252);
-	color: rgb(67, 57, 76);
-	font-size: 15px;
+@layer base {
+	body {
+		background-color: rgb(255, 252, 252);
+		color: rgb(67, 57, 76);
+		font-size: 15px;
+	}
 }
 
 @layer components {
