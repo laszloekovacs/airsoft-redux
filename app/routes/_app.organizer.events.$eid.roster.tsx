@@ -11,7 +11,7 @@ import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.$eid.roster"
 
 const assignmentSchema = z.object({
-	userId: z.string(),
+	id: z.coerce.number(),
 	faction: z.string().nullable().optional(),
 	intent: z.enum(["assignToFaction"]),
 })
@@ -23,20 +23,17 @@ export async function action({ params, request }: Route.ActionArgs) {
 	const formData = await request.formData()
 	const submission = parseWithZod(formData, { schema: assignmentSchema })
 
-	console.log(submission)
-
 	if (submission.status != "success") {
 		return submission.reply()
 	}
 
 	// check for intent of assign, modify registrations
 	if (submission.value.intent == "assignToFaction") {
-		console.log("reassign")
-
+		// TODO: use registration id not user id
 		await db
 			.update(registrationTable)
 			.set({ faction: submission.value.faction ?? null })
-			.where(eq(registrationTable.userId, submission.value.userId ?? null))
+			.where(eq(registrationTable.id, submission.value.id))
 	}
 
 	return submission.reply()
@@ -77,7 +74,7 @@ export default function RosterPage({ loaderData }: Route.ComponentProps) {
 }
 
 type RowType = {
-	user: typeof user.$inferInsert | null
+	user: typeof user.$inferSelect | null
 	registration: typeof registrationTable.$inferSelect
 }
 
@@ -97,14 +94,13 @@ const Registrations = ({ registrations }: { registrations: RowType[] }) => {
 }
 
 const RegistrationsRow = ({ reg }: { reg: RowType }) => {
-	const actionData = useActionData<typeof action>()
 	const fetcher = useFetcher()
 
 	const [form, field] = useForm({
-		lastResult: actionData,
+		lastResult: fetcher.data,
 		constraint: getZodConstraint(assignmentSchema),
 		defaultValue: {
-			userId: reg.registration.userId,
+			id: reg.registration.id,
 			faction: reg.registration.faction,
 			intent: "assignToFaction",
 		},
@@ -112,21 +108,16 @@ const RegistrationsRow = ({ reg }: { reg: RowType }) => {
 
 	return (
 		<div>
-			{actionData?.status == "success" && <p>frissítve</p>}
+			{fetcher?.data && <p>frissítve</p>}
 			<p>{reg.user?.username || "classified"}</p>
 
 			<fetcher.Form method="POST" {...getFormProps(form)}>
-				<input {...getInputProps(field.userId, { type: "hidden" })} />
+				<input {...getInputProps(field.id, { type: "hidden" })} />
 				<input
 					className="input-field"
 					{...getInputProps(field.faction, { type: "text" })}
 				/>
-				<button
-					className="btn btn-primary"
-					type="submit"
-					value="assignToFaction"
-					name="intent"
-				>
+				<button className="btn btn-primary" type="submit">
 					<span>módosít</span>
 				</button>
 			</fetcher.Form>
