@@ -11,7 +11,7 @@ import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.$eid.roster"
 
 const assignmentSchema = z.object({
-	id: z.coerce.number(),
+	regId: z.coerce.number(),
 	faction: z.string().nullable().optional(),
 	intent: z.enum(["assignToFaction"]),
 })
@@ -33,7 +33,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 		await db
 			.update(registrationTable)
 			.set({ faction: submission.value.faction ?? null })
-			.where(eq(registrationTable.id, submission.value.id))
+			.where(eq(registrationTable.id, submission.value.regId))
 	}
 
 	return submission.reply()
@@ -113,7 +113,7 @@ const RegistrationsRow = ({
 		lastResult: fetcher.data,
 		constraint: getZodConstraint(assignmentSchema),
 		defaultValue: {
-			id: reg.registration.id,
+			regId: reg.registration.id,
 			faction: reg.registration.faction,
 			intent: "assignToFaction",
 		},
@@ -125,22 +125,19 @@ const RegistrationsRow = ({
 			<p>{reg.user?.username || "classified"}</p>
 
 			<fetcher.Form method="POST" {...getFormProps(form)}>
-				<input {...getInputProps(field.id, { type: "hidden" })} />
+				<div className="flex flex-row gap-4 max-w-sm">
+					<input {...getInputProps(field.regId, { type: "hidden" })} />
+					<input {...getInputProps(field.intent, { type: "hidden" })} />
 
-				<input
-					className="input-field"
-					list={`factions-${reg.registration.id}`}
-					{...getInputProps(field.faction, { type: "text" })}
-				/>
-				<datalist id={`factions-${reg.registration.id}`}>
-					{factions.map((f) => (
-						<option key={f} value={f} />
-					))}
-				</datalist>
+					<input
+						className="input-field"
+						{...getInputProps(field.faction, { type: "text" })}
+					/>
 
-				<button className="btn btn-primary" type="submit">
-					<span>módosít</span>
-				</button>
+					<button className="btn btn-primary" type="submit">
+						<span>módosít</span>
+					</button>
+				</div>
 			</fetcher.Form>
 		</div>
 	)
