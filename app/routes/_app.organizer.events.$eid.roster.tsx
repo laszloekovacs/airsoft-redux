@@ -1,7 +1,12 @@
-import { getFormProps, getInputProps, useForm } from "@conform-to/react"
+import {
+	getFormProps,
+	getInputProps,
+	getSelectProps,
+	useForm,
+} from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
-import { useActionData, useFetcher } from "react-router"
+import { useFetcher } from "react-router"
 import z from "zod"
 import { requireRole } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
@@ -79,13 +84,20 @@ type RowType = {
 }
 
 const Registrations = ({ registrations }: { registrations: RowType[] }) => {
+	// gather existing factions
+	const factions = [
+		...new Set(
+			registrations.map((r) => r.registration.faction).filter(Boolean),
+		),
+	] as string[]
+
 	return (
 		<div>
 			<span>Eseményre regisztráltak</span>
 			<ul>
 				{registrations.map((r) => (
 					<li key={r.registration.id}>
-						<RegistrationsRow reg={r} />
+						<RegistrationsRow reg={r} factions={factions} />
 					</li>
 				))}
 			</ul>
@@ -93,7 +105,13 @@ const Registrations = ({ registrations }: { registrations: RowType[] }) => {
 	)
 }
 
-const RegistrationsRow = ({ reg }: { reg: RowType }) => {
+const RegistrationsRow = ({
+	reg,
+	factions,
+}: {
+	reg: RowType
+	factions: string[]
+}) => {
 	const fetcher = useFetcher()
 
 	const [form, field] = useForm({
@@ -113,10 +131,18 @@ const RegistrationsRow = ({ reg }: { reg: RowType }) => {
 
 			<fetcher.Form method="POST" {...getFormProps(form)}>
 				<input {...getInputProps(field.id, { type: "hidden" })} />
+
 				<input
 					className="input-field"
+					list={`factions-${reg.registration.id}`}
 					{...getInputProps(field.faction, { type: "text" })}
 				/>
+				<datalist id={`factions-${reg.registration.id}`}>
+					{factions.map((f) => (
+						<option key={f} value={f} />
+					))}
+				</datalist>
+
 				<button className="btn btn-primary" type="submit">
 					<span>módosít</span>
 				</button>
