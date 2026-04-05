@@ -4,6 +4,8 @@ type TaskData = {
 	message: string
 }
 
+console.log("stats worker registered")
+
 // both should be embedded: true
 // the name of the queue and the worker establises the connection between the 2
 const queue = new Queue<TaskData>("test", { embedded: true })

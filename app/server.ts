@@ -15,6 +15,9 @@ app.get("/health", (c) =>
 
 //app.use('/public/*', serveStatic({ root: './public' }))
 
+// run queue scripts at start
+import "~/services/queue.server"
+
 // First, create the React Router server (adds asset serving + SSR catch-all `*`)
 const server = await createHonoServer({ app })
 
