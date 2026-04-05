@@ -39,7 +39,6 @@ export async function loader({ params }: Route.LoaderArgs) {
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.id, Number(params.eid)))
-
 	const event = expectOne(events)
 
 	// fetch the registrations relevant to this event
@@ -48,6 +47,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 		.select()
 		.from(registrationTable)
 		.where(eq(registrationTable.eventId, Number(params.eid)))
+		.orderBy(registrationTable.faction)
 		.leftJoin(user, eq(registrationTable.userId, user.id))
 
 	// TODO: possibly await with promise.all
@@ -75,6 +75,7 @@ type RowType = {
 const Registrations = ({ registrations }: { registrations: RowType[] }) => {
 	return (
 		<div>
+			<span>Esemenyre regisztraltak</span>
 			<ul>
 				{registrations.map((r) => (
 					<li key={r.registration.id}>
@@ -90,6 +91,7 @@ const RegistrationsRow = ({ reg }: { reg: RowType }) => {
 	return (
 		<div>
 			<p>{reg.user?.username || "classified"}</p>
+			<p>{reg.registration.faction}</p>
 		</div>
 	)
 }
