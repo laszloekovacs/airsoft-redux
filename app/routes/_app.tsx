@@ -1,11 +1,11 @@
 import { Outlet } from "react-router"
 import { PageHeader } from "~/components/header"
 import { HeaderLinks } from "~/components/headerlinks"
-import requireSession from "~/functions/requiresession"
+import { auth } from "~/services/auth.server"
 import type { Route } from "./+types/_app"
 
 export async function loader({ request }: Route.ActionArgs) {
-	const sessionData = await requireSession(request)
+	const sessionData = await auth.api.getSession(request)
 
 	return { sessionData }
 }

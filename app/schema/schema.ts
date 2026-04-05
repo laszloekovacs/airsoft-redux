@@ -42,6 +42,8 @@ export const registrationTable = pgTable("registration", {
 	factionId: integer()
 		.references(() => factionsTable.id)
 		.notNull(),
+	// name of faction, null or empty means unasigned
+	faction: text(),
 })
 
 // factions per event
