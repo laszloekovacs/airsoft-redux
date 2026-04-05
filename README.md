@@ -21,6 +21,13 @@ users also can discuss events by leaving comments, replies.
 Built with ❤️ using React Router.
 [![Formatted with Biome](https://img.shields.io/badge/Formatted_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev/)
 
+###
+possible theme colors
+- rgb(255,252,252)
+- rgb(67,57,76)
+- font size 14, 20
+
+
 ### inspirational webpages
 - https://hex.tech/
 - https://www.convex.dev/

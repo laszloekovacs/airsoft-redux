@@ -16,6 +16,9 @@ const envSchema = z.object({
 	TYPESENSE_HOST: z.string(),
 	TYPESENSE_APIKEY: z.string(),
 	CAP_CONNECTION_STRING: z.string(),
+
+	UMAMI_URL: z.string(),
+	UMAMI_ID: z.string(),
 })
 
 const _env = envSchema.parse(process.env)

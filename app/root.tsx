@@ -5,11 +5,13 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
+	useLoaderData,
 } from "react-router"
 
 import type { Route } from "./+types/root"
 import "./app.css"
 import { DeveloperFooter } from "./components/developerfooter"
+import { env } from "./services/env.server"
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -24,7 +26,29 @@ export const links: Route.LinksFunction = () => [
 	},
 ]
 
+const UmamiTrackingScript = ({
+	src,
+	web_id,
+}: {
+	src: string
+	web_id: string
+}) => {
+	return <script defer src={src} data-website-id={web_id}></script>
+}
+
+// this still gets executed and useLoaderData points to this
+export const loader = () => {
+	const umami = {
+		umami_url: env.UMAMI_URL,
+		umami_id: env.UMAMI_ID
+	}
+
+	return umami
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+	const {umami_url, umami_id} = useLoaderData<typeof loader>()
+	
 	return (
 		<html lang="en">
 			<head>
@@ -38,10 +62,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<DeveloperFooter />
 				<ScrollRestoration />
 				<Scripts />
+				<UmamiTrackingScript src={umami_url} web_id={umami_id} />
 			</body>
 		</html>
 	)
 }
+
 
 export default function App() {
 	return <Outlet />
@@ -58,7 +84,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 			error.status === 404
 				? "The requested page could not be found."
 				: error.statusText || details
-	} else if (import.meta.env.DEV && error && error instanceof Error) {
+	} else if (error && error instanceof Error) {
 		details = error.message
 		stack = error.stack
 	}
