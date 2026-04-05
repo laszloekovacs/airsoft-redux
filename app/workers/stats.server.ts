@@ -8,7 +8,7 @@ console.log("stats worker registered")
 
 // both should be embedded: true
 // the name of the queue and the worker establises the connection between the 2
-const queue = new Queue<TaskData>("test", { embedded: true })
+export const testQueue = new Queue<TaskData>("test", { embedded: true })
 const worker = new Worker<TaskData>(
 	"test",
 	async (job) => {
@@ -25,5 +25,5 @@ worker.on("completed", (job, result) => {
 
 // call this in a loader or action
 export const scheduleJob = async () => {
-	await queue.add("working", { message: "bunqueue is working" })
+	await testQueue.add("working", { message: "bunqueue is working" })
 }
