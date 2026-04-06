@@ -18,6 +18,8 @@ const envSchema = z.object({
 
 	UMAMI_URL: z.string(),
 	UMAMI_ID: z.string(),
+
+	REDIS_CONNECTION_STRING: z.string(),
 })
 
 const _env = envSchema.parse(process.env)
