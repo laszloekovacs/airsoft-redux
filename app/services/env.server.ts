@@ -13,8 +13,7 @@ const envSchema = z.object({
 	BETTER_AUTH_SECRET: z.string().min(32).default(defaultAuthSecret),
 	BETTER_AUTH_URL: z.string().default(defaultAuthUrl),
 	STORAGE_DRIVER: z.enum(["picsum"]).default(defaultStorageDriver),
-	TYPESENSE_HOST: z.string(),
-	TYPESENSE_APIKEY: z.string(),
+
 	CAP_CONNECTION_STRING: z.string(),
 
 	UMAMI_URL: z.string(),

@@ -7,7 +7,6 @@ import expectOne from "~/functions/expectone"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.$eid.tags"
-import { enqueueEventForIndexing } from "~/workers/search-indexing.server"
 
 const schema = z.object({
 	tag: z.string(),
@@ -75,7 +74,7 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
 	console.log(submission)
 
 	if (submission.value.intent === "addTag") {
-		const [result] = await db
+		await db
 			.update(eventTable)
 			.set({
 				tags: sql`
@@ -88,22 +87,17 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
 			.where(eq(eventTable.id, Number(params.eid)))
 			.returning()
 
-		// schedule a search reindexing on change
-		enqueueEventForIndexing(result)
-
 		return submission.reply({ resetForm: true })
 	}
 
 	if (submission.value.intent == "removeTag") {
-		const [result] = await db
+		await db
 			.update(eventTable)
 			.set({
 				tags: sql`array_remove(${eventTable.tags}, ${submission.value.tag})`,
 			})
 			.where(eq(eventTable.id, Number(params.eid)))
 			.returning()
-
-		enqueueEventForIndexing(result)
 	}
 
 	return submission.reply()
