@@ -3,7 +3,7 @@ import { redis } from "./redis.server"
 
 export async function createEventSchema() {
 	try {
-		await redis.ft.dropIndex("idx:events", { DD: true })
+		await redis.ft.dropIndex("idx:event", { DD: true })
 	} catch {} // silently ignore error
 
 	await redis.ft.create(
@@ -31,10 +31,11 @@ export async function removeEvent(eventId: string) {
 	await redis.json.del(`event:${eventId}`)
 }
 
+// main search function
 export async function searchEvents(query: string) {
 	// TODO: filtering
 
-	const results = await redis.ft.search("idx:events", "", {
+	const results = await redis.ft.search("idx:event", query, {
 		RETURN: ["id", "title"],
 	})
 

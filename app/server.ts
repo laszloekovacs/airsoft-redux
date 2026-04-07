@@ -28,6 +28,35 @@ app.get("/generate", async (c) => {
 import "~/services/queue.server"
 
 import "~/services/redis.server"
+import {
+	createEventSchema,
+	indexEvent,
+	searchEvents,
+} from "./services/search.server"
+import { db } from "./services/drizzle.server"
+import { eventTable } from "./schema/schema"
+
+app.get("/indexng", async (c) => {
+	await createEventSchema()
+
+	return c.text("ran schema creation")
+})
+
+app.get("/ingest", async (c) => {
+	const [event] = await db.select().from(eventTable)
+
+	await indexEvent(event)
+
+	return c.text("ingested")
+})
+
+app.get("/find", async (c) => {
+	const sid = c.req.query("q") ?? "b"
+
+	await searchEvents(sid)
+
+	return c.text(JSON.stringify(sid, null, 2))
+})
 
 // First, create the React Router server (adds asset serving + SSR catch-all `*`)
 const server = await createHonoServer({ app })
