@@ -38,6 +38,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<DeveloperFooter />
 				<ScrollRestoration />
 				<Scripts />
+				<script
+					defer
+					src="https://umami.am4.duckdns.org/script.js"
+					data-website-id="412980fa-8e5b-4c9a-adfa-dd16395cde5d"
+				></script>
 			</body>
 		</html>
 	)
