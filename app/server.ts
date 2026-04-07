@@ -36,7 +36,7 @@ import {
 import { db } from "./services/drizzle.server"
 import { eventTable } from "./schema/schema"
 
-app.get("/indexng", async (c) => {
+app.get("/schema", async (c) => {
 	await createEventSchema()
 
 	return c.text("ran schema creation")
@@ -53,9 +53,10 @@ app.get("/ingest", async (c) => {
 app.get("/find", async (c) => {
 	const sid = c.req.query("q") ?? "b"
 
-	await searchEvents(sid)
+	const result = await searchEvents(sid)
+	console.log(result)
 
-	return c.text(JSON.stringify(sid, null, 2))
+	return c.text(JSON.stringify(result, null, 2))
 })
 
 // First, create the React Router server (adds asset serving + SSR catch-all `*`)

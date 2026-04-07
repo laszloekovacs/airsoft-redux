@@ -9,12 +9,12 @@ export async function createEventSchema() {
 	await redis.ft.create(
 		"idx:event",
 		{
-			"$.id": { type: "TAG", AS: "id" },
+			"$.id": { type: "NUMERIC", AS: "id" },
 			"$.title": { type: "TEXT", AS: "title", WEIGHT: 3 },
 		},
 		{
 			ON: "JSON",
-			PREFIX: "event",
+			PREFIX: ["event:"],
 		},
 	)
 }
@@ -23,7 +23,7 @@ export async function createEventSchema() {
 export async function indexEvent(event: typeof eventTable.$inferSelect) {
 	await redis.json.set(`event:${event.id}`, "$", {
 		id: event.id,
-		name: event.title,
+		title: event.title,
 	})
 }
 
@@ -34,8 +34,9 @@ export async function removeEvent(eventId: string) {
 // main search function
 export async function searchEvents(query: string) {
 	// TODO: filtering
+	const ftQuery = `@title:${query}*`
 
-	const results = await redis.ft.search("idx:event", query, {
+	const results = await redis.ft.search("idx:event", ftQuery, {
 		RETURN: ["id", "title"],
 	})
 
