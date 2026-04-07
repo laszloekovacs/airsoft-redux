@@ -26,15 +26,12 @@ app.get("/generate", async (c) => {
 
 // run queue scripts at start
 import "~/services/queue.server"
-
 import "~/services/redis.server"
-import {
-	createEventSchema,
-	indexEvent,
-	searchEvents,
-} from "./services/search.server"
-import { db } from "./services/drizzle.server"
+
+import { searchRoute } from "./api/search"
 import { eventTable } from "./schema/schema"
+import { db } from "./services/drizzle.server"
+import { createEventSchema, indexEvent } from "./services/search.server"
 
 app.get("/schema", async (c) => {
 	await createEventSchema()
@@ -50,14 +47,7 @@ app.get("/ingest", async (c) => {
 	return c.text("ingested")
 })
 
-app.get("/find", async (c) => {
-	const sid = c.req.query("q") ?? "b"
-
-	const result = await searchEvents(sid)
-	console.log(result)
-
-	return c.text(JSON.stringify(result, null, 2))
-})
+app.route("/endpoint", searchRoute)
 
 // First, create the React Router server (adds asset serving + SSR catch-all `*`)
 const server = await createHonoServer({ app })
