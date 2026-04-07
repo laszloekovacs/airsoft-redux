@@ -14,6 +14,7 @@
     "@cap.js/widget": "^0.1.43",
     "@conform-to/react": "^1.18.0",
     "@conform-to/zod": "^1.18.0",
+    "@huggingface/transformers": "^4.0.1",
     "@preact/signals-react": "^3.10.0",
     "@react-router/fs-routes": "^7.14.0",
     "@react-router/node": "7.13.1",

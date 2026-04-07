@@ -3,14 +3,22 @@
 //import { serveStatic } from "@hono/node-server/serve-static"
 import { Hono } from "hono"
 import { createHonoServer } from "react-router-hono-server/bun"
+import { pipeline } from "@huggingface/transformers"
 
 const app = new Hono()
 
-app.get("/health", (c) =>
-	c.json({
-		status: "ok",
-	}),
+const classifier = await pipeline(
+	"sentiment-analysis",
+	"Xenova/distilbert-base-uncased-finetuned-sst-2-english",
 )
+
+app.get("/generate", async (c) => {
+	const verdict = await classifier("im tired of these errors")
+
+	return c.json({
+		verdict,
+	})
+})
 // Public assets (these should usually come early)
 
 //app.use('/public/*', serveStatic({ root: './public' }))
