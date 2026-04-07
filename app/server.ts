@@ -18,6 +18,8 @@ app.get("/health", (c) =>
 // run queue scripts at start
 import "~/services/queue.server"
 
+import "~/services/redis.server"
+
 // First, create the React Router server (adds asset serving + SSR catch-all `*`)
 const server = await createHonoServer({ app })
 

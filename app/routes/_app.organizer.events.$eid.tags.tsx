@@ -1,12 +1,12 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
+import { eq, sql } from "drizzle-orm"
 import { useFetcher } from "react-router"
 import z from "zod"
+import expectOne from "~/functions/expectone"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.$eid.tags"
-import { eq, sql } from "drizzle-orm"
-import expectOne from "~/functions/expectone"
 
 const schema = z.object({
 	tag: z.string(),
@@ -36,8 +36,6 @@ export default function TagsPage({ loaderData }: Route.ComponentProps) {
 	})
 
 	const { event } = loaderData
-
-	// TODO: on success clear form
 
 	return (
 		<div>
@@ -87,6 +85,7 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
             `,
 			})
 			.where(eq(eventTable.id, Number(params.eid)))
+			.returning()
 
 		return submission.reply({ resetForm: true })
 	}
@@ -98,6 +97,7 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
 				tags: sql`array_remove(${eventTable.tags}, ${submission.value.tag})`,
 			})
 			.where(eq(eventTable.id, Number(params.eid)))
+			.returning()
 	}
 
 	return submission.reply()
