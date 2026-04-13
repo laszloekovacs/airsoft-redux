@@ -1,7 +1,5 @@
 import { Link } from "react-router"
 import { eventTable } from "~/schema/schema"
-import type { SessionData } from "~/services/auth.server"
-import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app._index"
 
@@ -12,37 +10,19 @@ export function meta(_args: Route.MetaArgs) {
 	]
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-	// session data
-	const session = await auth.api.getSession(request)
-
+export async function loader() {
 	// fetch new events
 	const events = await db.select().from(eventTable).limit(10)
 
-	return { session, events }
+	return { events }
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-	const { events, session } = loaderData
+	const { events } = loaderData
 
 	return (
 		<div>
-			<SessionInfo session={session} />
-
 			<EventList events={events} />
-		</div>
-	)
-}
-
-// user accound display
-const SessionInfo = ({ session }: { session: SessionData | null }) => {
-	if (!session) return <div>no session</div>
-
-	const { user } = session
-
-	return (
-		<div>
-			<p>{user.username}</p>
 		</div>
 	)
 }
