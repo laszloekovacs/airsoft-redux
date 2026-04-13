@@ -1,4 +1,10 @@
-import { NavLink } from "react-router"
+import { Link } from "react-router"
+import {
+	NavigationMenu,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+} from "~/components/ui/navigation-menu"
 
 type LinkProps = {
 	isOrganizer: boolean
@@ -7,11 +13,31 @@ type LinkProps = {
 
 export const HeaderLinks = ({ isOrganizer, isAdmin }: LinkProps) => {
 	return (
-		<div className="flex flex-row gap-8 py-6">
-			<NavLink to="/">főoldal</NavLink>
-			<NavLink to="/account">profilod</NavLink>
-			{isOrganizer && <NavLink to="/organizer">szervező oldal</NavLink>}
-			{isAdmin && <NavLink to="/admin">admin</NavLink>}
-		</div>
+		<NavigationMenu>
+			<NavigationMenuList>
+				<NavigationMenuItem>
+					<NavigationMenuLink asChild>
+						<Link to="/">főoldal</Link>
+					</NavigationMenuLink>
+				</NavigationMenuItem>
+				<NavigationMenuItem>
+					<NavigationMenuLink asChild>
+						<Link to="/account">profilod</Link>
+					</NavigationMenuLink>
+				</NavigationMenuItem>
+				<NavigationMenuItem>
+					<NavigationMenuLink asChild>
+						{(isOrganizer || isAdmin) && (
+							<Link to="/organizer">szervező oldal</Link>
+						)}
+					</NavigationMenuLink>
+				</NavigationMenuItem>
+				<NavigationMenuItem>
+					<NavigationMenuLink asChild>
+						{isAdmin && <Link to="/admin">admin</Link>}
+					</NavigationMenuLink>
+				</NavigationMenuItem>
+			</NavigationMenuList>
+		</NavigationMenu>
 	)
 }

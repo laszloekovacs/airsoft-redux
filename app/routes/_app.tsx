@@ -18,9 +18,11 @@ export default function AppLayout({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div className="flex flex-col px-4 py-6 min-h-screen">
-			<PageHeader />
-			<HeaderLinks isAdmin={isAdmin} isOrganizer={isOrganizer} />
-			<Outlet />
+			<div>
+				<PageHeader />
+				<HeaderLinks isAdmin={isAdmin} isOrganizer={isOrganizer} />
+				<Outlet />
+			</div>
 		</div>
 	)
 }
