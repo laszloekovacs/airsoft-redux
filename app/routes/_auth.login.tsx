@@ -3,9 +3,7 @@ import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
 import { Form, Link, redirect, useNavigation } from "react-router"
 import z from "zod"
-import { auth } from "~/services/auth.server"
-import { logger } from "~/services/pino.server"
-import type { Route } from "./+types/_auth.login"
+import { Button } from "~/components/ui/button"
 import {
 	Field,
 	FieldDescription,
@@ -14,7 +12,9 @@ import {
 	FieldLabel,
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-import { Button } from "~/components/ui/button"
+import { auth } from "~/services/auth.server"
+import { logger } from "~/services/pino.server"
+import type { Route } from "./+types/_auth.login"
 
 const schema = z.object({
 	email: z.email().nonempty(),
