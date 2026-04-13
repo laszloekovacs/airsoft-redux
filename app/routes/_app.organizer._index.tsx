@@ -4,6 +4,7 @@ import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer._index"
+import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table"
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
@@ -22,7 +23,7 @@ export default function OrganizerPage({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div>
-			<h2 className="mb-4">Általad szervezett események</h2>
+			<h2 className="font-bold text-2xl mb-4">Általad szervezett események</h2>
 			<OrganizersEventList events={events} />
 		</div>
 	)
@@ -38,12 +39,16 @@ const OrganizersEventList = ({
 	}
 
 	return (
-		<ul>
-			{events?.map((i) => (
-				<li key={i.id}>
-					<Link to={`events/${i.id}`}>{i.title}</Link>
-				</li>
-			))}
-		</ul>
+		<Table>
+			<TableBody>
+				{events?.map((i) => (
+					<TableRow key={i.id}>
+						<TableCell>
+							<Link to={`events/${i.id}`}>{i.title}</Link>
+						</TableCell>
+					</TableRow>
+				))}
+			</TableBody>
+		</Table>
 	)
 }
