@@ -4,7 +4,14 @@ import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer._index"
-import { Table, TableBody, TableCell, TableRow } from "~/components/ui/table"
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "~/components/ui/table"
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
@@ -40,6 +47,11 @@ const OrganizersEventList = ({
 
 	return (
 		<Table>
+			<TableHeader>
+				<TableRow>
+					<TableHead>esemeny neve</TableHead>
+				</TableRow>
+			</TableHeader>
 			<TableBody>
 				{events?.map((i) => (
 					<TableRow key={i.id}>
