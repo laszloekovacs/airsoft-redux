@@ -1,5 +1,6 @@
 import "@cap.js/widget"
 import { useEffect, useState } from "react"
+import SearchContainer from "~/components/Search"
 import { env } from "~/services/env.server"
 import type { Route } from "./+types/xguide"
 
@@ -30,11 +31,12 @@ export default function StyleGuide({ loaderData }: Route.ComponentProps) {
 				</button>
 			</div>
 
-			<CappedForm endpoint={loaderData.cap_endpoint} />
+			<SearchContainer />
 		</div>
 	)
 }
 
+//<CappedForm endpoint={loaderData.cap_endpoint} />
 // TODO: lift up state from widget with callbacks
 const CappedForm = ({ endpoint }: { endpoint: string }) => {
 	const [isMounted, setMounted] = useState(false)

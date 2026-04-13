@@ -34,3 +34,6 @@ possible theme colors
 - https://signoz.io/
 - https://infisical.com/
 - https://trigger.dev/
+
+### umami tracking
+should be loaded from the same url, for now adblockers block it

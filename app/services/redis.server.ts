@@ -1,12 +1,12 @@
 import { createClient } from "redis"
 import { env } from "~/services/env.server"
 
-const client = createClient({
+export const redis = createClient({
 	url: env.REDIS_CONNECTION_STRING,
 })
 
-client.on("error", (err) => console.log("Redis client error: ", err))
+redis.on("error", (err) => console.log("Redis client error: ", err))
 
-await client.connect()
+await redis.connect()
 
 console.log("redis client started")
