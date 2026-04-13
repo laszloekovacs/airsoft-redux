@@ -60,15 +60,16 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 							/>
 							<FieldError> {fields.password.errors}</FieldError>
 						</Field>
-
-						<Button
-							type="submit"
-							name="intent"
-							value="login"
-							disabled={isSubmitting}
-						>
-							belepes
-						</Button>
+						<Field>
+							<Button
+								type="submit"
+								name="intent"
+								value="login"
+								disabled={isSubmitting}
+							>
+								belepes
+							</Button>
+						</Field>
 					</FieldGroup>
 				</Form>
 
