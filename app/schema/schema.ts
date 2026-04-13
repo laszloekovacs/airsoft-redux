@@ -37,20 +37,6 @@ export const registrationTable = pgTable("registration", {
 	eventId: integer().references(() => eventTable.id, { onDelete: "cascade" }),
 	message: text(),
 	createdAt: date().defaultNow().notNull(),
-	factionId: integer()
-		.references(() => factionsTable.id)
-		.notNull(),
 	// name of faction, null or empty means unasigned
 	faction: text(),
-})
-
-// factions per event
-// TODO: names should be unique per event
-export const factionsTable = pgTable("factions", {
-	id: integer().primaryKey().generatedAlwaysAsIdentity(),
-	eventId: integer().references(() => eventTable.id, { onDelete: "cascade" }),
-	name: text().notNull(),
-
-	// sorting order, 0 is reserved for the default team
-	order: integer().notNull().default(0),
 })
