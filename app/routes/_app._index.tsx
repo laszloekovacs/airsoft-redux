@@ -39,9 +39,12 @@ const EventList = ({
 
 	const list = events?.map((item) => (
 		<li key={item.id}>
-			<Link to={`/event/${item.id}`}>
-				<p>{item.title}</p>
-			</Link>
+			<div className="mb-6">
+				<Link to={`/event/${item.id}`}>
+					<p>{item.title}</p>
+					<img src="https://picsum.photos/400/200" alt="event" />
+				</Link>
+			</div>
 		</li>
 	))
 

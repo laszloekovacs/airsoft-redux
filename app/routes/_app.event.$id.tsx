@@ -71,6 +71,9 @@ export default function EventDetailsPage({ loaderData }: Route.ComponentProps) {
 				<span>meghirdetve&nbsp;</span>
 				<span>{event.createdAt}</span>
 			</p>
+			<div>
+				<img src="https://picsum.photos/400/200" alt="event" />
+			</div>
 
 			<BadgeList badges={event.tags} />
 			<ApplicationForm isRegistered={isRegistered} isLoggedin={isLoggedin} />
