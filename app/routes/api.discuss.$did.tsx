@@ -2,6 +2,8 @@ import { eq } from "drizzle-orm"
 import { commentTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/api.discuss.$did"
+import { parseWithZod } from "@conform-to/zod/v4"
+import { z } from "zod/v4"
 
 // load comments, the parameter is the discussion table id
 export async function loader({ params }: Route.LoaderArgs) {
@@ -18,4 +20,35 @@ export async function loader({ params }: Route.LoaderArgs) {
 		.where(eq(commentTable.discussionId, Number(did)))
 
 	return { comments }
+}
+
+export async function action({ params, request }: Route.ActionArgs) {
+	const { did } = params
+
+	if (Number.isNaN(did)) {
+		throw new Error("wrong param")
+	}
+
+	// conform
+	const schema = z.object({
+		message: z.string(),
+	})
+
+	const formData = await request.formData()
+	const submission = parseWithZod(formData, { schema })
+
+	if (submission.status != "success") {
+		return submission.reply()
+	}
+
+	// insert new comment
+	await db
+		.insert(commentTable)
+		.values({
+			discussionId: Number(did),
+			message: submission.value.message,
+			userId: null,
+		})
+
+	return submission
 }
