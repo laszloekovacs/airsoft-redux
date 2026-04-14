@@ -30,6 +30,9 @@ export default function OrganizerPage({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div>
+			<Link to="/organizer/events/new" className="underline underline-offset-4">
+				uj esemeny
+			</Link>
 			<h2 className="font-bold text-2xl mb-4">Általad szervezett események</h2>
 			<OrganizersEventList events={events} />
 		</div>
