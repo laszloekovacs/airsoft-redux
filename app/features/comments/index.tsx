@@ -3,7 +3,7 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint } from "@conform-to/zod/v4"
 import { useEffect } from "react"
 import { useFetcher } from "react-router"
-import { number, z } from "zod/v4"
+import { z } from "zod/v4"
 import type { action, loader } from "~/routes/api.discuss.$did"
 
 export const CommentSection = ({
@@ -25,7 +25,16 @@ export const CommentSection = ({
 	return (
 		<div>
 			<span>{discussionId && <CommentForm discussionId={discussionId} />}</span>
-			<span>{JSON.stringify(fetcher.data)}</span>
+
+			{fetcher?.data?.comments?.map((item) => (
+				<li key={item.id}>
+					<Comment
+						createdAt={item.createdAt}
+						message={item.message ?? ""}
+						userId={item.userId ?? ""}
+					/>
+				</li>
+			))}
 		</div>
 	)
 }
@@ -52,6 +61,24 @@ const CommentForm = ({ discussionId }: { discussionId: number }) => {
 				<input {...getInputProps(field.message, { type: "text" })} />
 				<button type="submit">komment</button>
 			</fetcher.Form>
+		</div>
+	)
+}
+
+const Comment = ({
+	createdAt,
+	message,
+	userId,
+}: {
+	createdAt: Date
+	message: string
+	userId: string
+}) => {
+	return (
+		<div>
+			<p>{userId}</p>
+			<p>{createdAt.toDateString()}</p>
+			<p>{message}</p>
 		</div>
 	)
 }
