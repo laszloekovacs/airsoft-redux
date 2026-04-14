@@ -15,8 +15,11 @@ onconnect = (event) => {
 		// Start interval only once
 		if (!pingInterval) {
 			pingInterval = setInterval(() => {
-				fetch(`/api/presence/${userId}`, { method: "POST" })
-			}, 30_000)
+				fetch(`/api/presence/${userId}`, {
+					method: "POST",
+					body: "online",
+				})
+			}, 2_000)
 		}
 	}
 
@@ -28,6 +31,12 @@ onconnect = (event) => {
 		if (ports.length === 0) {
 			clearInterval(pingInterval)
 			pingInterval = null
+
+			// send an expire message
+			fetch(`/api/presence/${userId}`, {
+				method: "POST",
+				body: "offline",
+			})
 		}
 	}
 }
