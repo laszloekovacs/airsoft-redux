@@ -1,5 +1,13 @@
 import { eq } from "drizzle-orm"
 import { Link } from "react-router"
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "~/components/ui/table"
 import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
@@ -22,7 +30,10 @@ export default function OrganizerPage({ loaderData }: Route.ComponentProps) {
 
 	return (
 		<div>
-			<h2 className="mb-4">Általad szervezett események</h2>
+			<Link to="/organizer/events/new" className="underline underline-offset-4">
+				uj esemeny
+			</Link>
+			<h2 className="font-bold text-2xl mb-4">Általad szervezett események</h2>
 			<OrganizersEventList events={events} />
 		</div>
 	)
@@ -38,12 +49,21 @@ const OrganizersEventList = ({
 	}
 
 	return (
-		<ul>
-			{events?.map((i) => (
-				<li key={i.id}>
-					<Link to={`events/${i.id}`}>{i.title}</Link>
-				</li>
-			))}
-		</ul>
+		<Table>
+			<TableHeader>
+				<TableRow>
+					<TableHead>esemeny neve</TableHead>
+				</TableRow>
+			</TableHeader>
+			<TableBody>
+				{events?.map((i) => (
+					<TableRow key={i.id}>
+						<TableCell>
+							<Link to={`events/${i.id}`}>{i.title}</Link>
+						</TableCell>
+					</TableRow>
+				))}
+			</TableBody>
+		</Table>
 	)
 }

@@ -1,5 +1,4 @@
 import { Outlet } from "react-router"
-import { PageHeader } from "~/components/header"
 import requireSession from "~/functions/requiresession"
 import type { Route } from "./+types/_app.account"
 
@@ -13,16 +12,16 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 	const { user } = loaderData
 
 	return (
-		<>
-			<h1 className="text-xl text-muted mb-6">Felhasználó fiók</h1>
+		<div>
+			<h1 className="text-2xl font-bold">Felhasználó fiók</h1>
 
 			<div className="mb-6">
 				<p>
-					<span className="text-muted">felhasznalo nev: </span>
+					<span>felhasznalo nev: </span>
 					<span>{user.username}</span>
 				</p>
 				<p>
-					<span className="text-muted">bejelentkezo email: </span>
+					<span>bejelentkezo email: </span>
 					<span>{user.email}</span>
 				</p>
 			</div>
@@ -34,6 +33,6 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 			/>
 
 			<Outlet />
-		</>
+		</div>
 	)
 }

@@ -2,16 +2,21 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { Form, redirect } from "react-router"
 import z from "zod"
+import { Button } from "~/components/ui/button"
+import { FieldError, FieldGroup, FieldLabel } from "~/components/ui/field"
+import { Input } from "~/components/ui/input"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
-import { eventTable, factionsTable } from "~/schema/schema"
+import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.new"
 
 const schema = z.object({
 	title: z
-		.string({ error: "kotelezo kitolteni" })
-		.min(5, { error: "a nev tul rovid" }),
+		.string({ error: "Az esemeny neve mezot kotelezo kitolteni!" })
+		.min(5, {
+			error: "az esemeny neve hosszabb kell hogy legyen 5 karakternel!",
+		}),
 })
 
 export default function NewEventForm({ actionData }: Route.ComponentProps) {
@@ -31,12 +36,23 @@ export default function NewEventForm({ actionData }: Route.ComponentProps) {
 
 	return (
 		<div>
-			<Form method="post" {...getFormProps(form)}>
-				<label htmlFor={fields.title.id}>esemeny neve</label>
-				<input {...getInputProps(fields.title, { type: "text" })} />
-				<p id={fields.title.errorId}>{fields.title.errors}</p>
+			<div>
+				<p>
+					Itt hozhatsz letre uj esemenyt. Az esemeny reszleteit a kovetkezo
+					oldalon tudod megadni. Ahhoz hogy jatekosok tudjanak jelentkezni, az
+					esemenyt szerkesztes utan meg kell osztanod
+				</p>
+			</div>
 
-				<button type="submit">letrehoz</button>
+			<Form method="post" {...getFormProps(form)}>
+				<FieldGroup>
+					<FieldLabel htmlFor={fields.title.id}>esemeny neve</FieldLabel>
+					<Input {...getInputProps(fields.title, { type: "text" })} />
+					<FieldError>
+						<span id={fields.title.errorId}>{fields.title.errors}</span>
+					</FieldError>
+					<Button type="submit">letrehoz</Button>
+				</FieldGroup>
 			</Form>
 		</div>
 	)
@@ -62,17 +78,10 @@ export async function action({ request }: Route.ActionArgs) {
 		})
 		.returning()
 
-	const event = expectOne(result, {
+	expectOne(result, {
 		notFound() {
 			throw new Error("nem sikerult az esemenyt letrehozni!")
 		},
-	})
-
-	// create the default faction
-	await db.insert(factionsTable).values({
-		name: "kispadosok",
-		order: 0,
-		eventId: event.id,
 	})
 
 	return redirect(`/organizer/events/${result[0].id}`)

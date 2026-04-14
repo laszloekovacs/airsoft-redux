@@ -3,6 +3,15 @@ import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
 import { Form, Link, redirect, useNavigation } from "react-router"
 import { z } from "zod"
+import { Button } from "~/components/ui/button"
+import {
+	Field,
+	FieldDescription,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "~/components/ui/field"
+import { Input } from "~/components/ui/input"
 import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
 import type { Route } from "./+types/_auth.register"
@@ -35,48 +44,62 @@ export default function SignupPage({ actionData }: Route.ComponentProps) {
 	})
 
 	return (
-		<div>
-			<h1>Signup page</h1>
+		<div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+			<div className="w-full max-w-sm">
+				<h1 className="font-bold text-2xl">Fiok letrehozasa</h1>
 
-			<Form method="post" {...getFormProps(form)}>
-				<div>
-					<label htmlFor={fields.email.id}>Email</label>
-					<input {...getInputProps(fields.email, { type: "email" })} />
-					<div className="bg-red-400">{fields.email.errors}</div>
-				</div>
+				<Form method="post" {...getFormProps(form)}>
+					<FieldGroup>
+						<Field>
+							<FieldLabel htmlFor={fields.email.id}>Email</FieldLabel>
+							<Input {...getInputProps(fields.email, { type: "email" })} />
+							<FieldError>{fields.email.errors}</FieldError>
+						</Field>
 
-				<div>
-					<label htmlFor={fields.password.id}>Jelszó</label>
-					<input {...getInputProps(fields.password, { type: "password" })} />
-					<div className="bg-red-400">{fields.password.errors}</div>
-				</div>
+						<Field>
+							<FieldLabel htmlFor={fields.password.id}>Jelszó</FieldLabel>
+							<Input
+								{...getInputProps(fields.password, { type: "password" })}
+							/>
+							<FieldError>{fields.password.errors}</FieldError>
+						</Field>
 
-				<div>
-					<label htmlFor={fields.username.id}>név</label>
-					<input {...getInputProps(fields.username, { type: "text" })} />
-					<div className="bg-red-400">{fields.username.errors}</div>
-				</div>
+						<Field>
+							<FieldLabel htmlFor={fields.username.id}>
+								Felhasznalo nev
+							</FieldLabel>
+							<Input {...getInputProps(fields.username, { type: "text" })} />
+							<FieldDescription>
+								Ezen a neven fogsz szerepelni a jelentkezesekben es a
+								hozzaszolasokban
+							</FieldDescription>
+							<FieldError>{fields.username.errors}</FieldError>
+						</Field>
 
-				<button
-					type="submit"
-					name="intent"
-					value="signup"
-					disabled={isSubmitting}
-				>
-					{isSubmitting ? "létrehozás..." : "Regisztrálok"}
-				</button>
+						<Field>
+							<Button
+								type="submit"
+								name="intent"
+								value="signup"
+								disabled={isSubmitting}
+							>
+								{isSubmitting ? "létrehozás..." : "Regisztrálok"}
+							</Button>
+						</Field>
 
-				<div>
-					{form.errors && <p className="bg-amber-500">{form.errors}</p>}
-				</div>
-			</Form>
+						<FieldError>{form.errors && <p>{form.errors}</p>}</FieldError>
+					</FieldGroup>
+				</Form>
 
-			<p>
-				már van fiókod?{" "}
-				<span>
-					<Link to="/login">jelentkezz be</Link>
-				</span>
-			</p>
+				<Field>
+					<span>
+						<span>már van fiókod?&nbsp;</span>
+						<Link className="underline underline-offset-4" to="/login">
+							jelentkezz be!
+						</Link>
+					</span>
+				</Field>
+			</div>
 		</div>
 	)
 }

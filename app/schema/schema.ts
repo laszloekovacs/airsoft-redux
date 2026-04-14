@@ -1,5 +1,13 @@
 import { sql } from "drizzle-orm"
-import { date, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core"
+import {
+	boolean,
+	date,
+	integer,
+	pgEnum,
+	pgTable,
+	text,
+	timestamp,
+} from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
 
 export const loggingTable = pgTable("loggin", {
@@ -28,6 +36,10 @@ export const eventTable = pgTable("event", {
 
 	createdAt: date().defaultNow().notNull(),
 	deletedAt: date(),
+
+	discussion: integer().references(() => discussionTable.id, {
+		onDelete: "set null",
+	}),
 })
 
 // players registered up to the event
@@ -37,20 +49,23 @@ export const registrationTable = pgTable("registration", {
 	eventId: integer().references(() => eventTable.id, { onDelete: "cascade" }),
 	message: text(),
 	createdAt: date().defaultNow().notNull(),
-	factionId: integer()
-		.references(() => factionsTable.id)
-		.notNull(),
 	// name of faction, null or empty means unasigned
 	faction: text(),
 })
 
-// factions per event
-// TODO: names should be unique per event
-export const factionsTable = pgTable("factions", {
+// holds the comment section, other tables and comments have references to this
+export const discussionTable = pgTable("discussion", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
-	eventId: integer().references(() => eventTable.id, { onDelete: "cascade" }),
-	name: text().notNull(),
+	active: boolean().default(true),
+})
 
-	// sorting order, 0 is reserved for the default team
-	order: integer().notNull().default(0),
+// holds a comment by user
+export const commentTable = pgTable("comment", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	discussionId: integer().references(() => discussionTable.id, {
+		onDelete: "cascade",
+	}),
+	userId: text().references(() => user.id, { onDelete: "set null" }),
+	message: text(),
+	createdAt: timestamp().defaultNow().notNull(),
 })

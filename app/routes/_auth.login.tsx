@@ -3,13 +3,22 @@ import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
 import { Form, Link, redirect, useNavigation } from "react-router"
 import z from "zod"
+import { Button } from "~/components/ui/button"
+import {
+	Field,
+	FieldDescription,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "~/components/ui/field"
+import { Input } from "~/components/ui/input"
 import { auth } from "~/services/auth.server"
 import { logger } from "~/services/pino.server"
 import type { Route } from "./+types/_auth.login"
 
 const schema = z.object({
-	email: z.email(),
-	password: z.string(),
+	email: z.email().nonempty(),
+	password: z.string().nonempty(),
 })
 
 export default function LoginPage({ actionData }: Route.ComponentProps) {
@@ -25,43 +34,57 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 			})
 		},
 		shouldValidate: "onBlur",
-		shouldRevalidate: "onInput",
+		shouldRevalidate: "onSubmit",
 	})
 
 	return (
-		<div>
-			<h1>login page</h1>
+		<div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+			<div className="w-full max-w-sm">
+				<h1 className="text-2xl font-bold">Bejelentkezes</h1>
 
-			<Form method="post" {...getFormProps(form)}>
+				<Form method="post" {...getFormProps(form)}>
+					<FieldGroup>
+						<Field>
+							<FieldLabel htmlFor={fields.email.id} className="font-bold">
+								email
+							</FieldLabel>
+							<Input {...getInputProps(fields.email, { type: "email" })} />
+							<FieldError>{fields.email.errors}</FieldError>
+						</Field>
+						<Field>
+							<FieldLabel htmlFor={fields.password.id} className="font-bold">
+								jelszo
+							</FieldLabel>
+							<Input
+								{...getInputProps(fields.password, { type: "password" })}
+							/>
+							<FieldError> {fields.password.errors}</FieldError>
+						</Field>
+						<Field>
+							<Button
+								type="submit"
+								name="intent"
+								value="login"
+								disabled={isSubmitting}
+							>
+								belepes
+							</Button>
+						</Field>
+					</FieldGroup>
+				</Form>
+
 				<div>
-					<label htmlFor={fields.email.id}>email</label>
-					<input {...getInputProps(fields.email, { type: "email" })} />
-					<div className="bg-red-500"> {fields.email.errors}</div>
-				</div>
-				<div>
-					<label htmlFor={fields.password.id}>jelszo</label>
-					<input {...getInputProps(fields.password, { type: "password" })} />
-					<div className="bg-red-500"> {fields.password.errors}</div>
+					{form.errors && <p className="bg-amber-500">{form.errors}</p>}
 				</div>
 
-				<button
-					type="submit"
-					name="intent"
-					value="login"
-					disabled={isSubmitting}
-				>
-					belepes
-				</button>
-			</Form>
+				<FieldDescription className="text-center">
+					<span>meg nincs fiokod?</span>
 
-			<div>{form.errors && <p className="bg-amber-500">{form.errors}</p>}</div>
-
-			<p>
-				meg nincs fiokod?
-				<span>
-					<Link to="/register">regisztralj!</Link>
-				</span>
-			</p>
+					<Link to="/register" className="underline underline-offset-4">
+						regisztralj!
+					</Link>
+				</FieldDescription>
+			</div>
 		</div>
 	)
 }

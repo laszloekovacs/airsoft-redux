@@ -33,7 +33,10 @@ export default function EventSummary({ loaderData }: Route.ComponentProps) {
 
 			<h2>{event.title}</h2>
 
-			<Link to={`/organizer/events/${event.id}/roster`}>reszletek</Link>
+			<div className="flex flex-row gap-6">
+				<Link to={`/organizer/events/${event.id}/roster`}>jelentkezok</Link>
+				<Link to={`/organizer/events/${event.id}/tags`}>tagek</Link>
+			</div>
 		</div>
 	)
 }

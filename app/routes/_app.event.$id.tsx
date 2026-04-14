@@ -1,16 +1,30 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
-import { and, asc, eq } from "drizzle-orm"
-import { useFetcher } from "react-router"
+import { RiAlertFill, RiCheckboxCircleFill } from "@remixicon/react"
+import { and, eq } from "drizzle-orm"
+import { Link, useFetcher } from "react-router"
 import z from "zod"
+import { Badge } from "~/components/ui/badge"
+import { Button } from "~/components/ui/button"
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemMedia,
+	ItemTitle,
+} from "~/components/ui/item"
+import { CommentSection } from "~/features/comments"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
-import { eventTable, factionsTable, registrationTable } from "~/schema/schema"
+import { eventTable, registrationTable } from "~/schema/schema"
+import { auth } from "~/services/auth.server"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.event.$id"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-	const { user } = await requireSession(request)
+	// does not require auth, but should only allow logged in users to sign up
+	const sessionData = await auth.api.getSession(request)
 
 	const events = await db
 		.select()
@@ -20,31 +34,54 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 
 	const event = expectOne(events)
 
-	// check if user has a registration for this event
-	const [registration] = await db
-		.select()
-		.from(registrationTable)
-		.where(
-			and(
-				eq(registrationTable.eventId, event.id),
-				eq(registrationTable.userId, user.id),
-			),
-		)
+	// if authed user,
+	// check if user has a registration for this event, if logged in
+	if (sessionData?.user != null) {
+		const [registration] = await db
+			.select()
+			.from(registrationTable)
+			.where(
+				and(
+					eq(registrationTable.eventId, event.id),
+					eq(registrationTable.userId, sessionData.user.id),
+				),
+			)
 
-	return { event, registration: registration ?? null }
+		return {
+			event,
+			user: sessionData.user,
+			registration: registration ?? null,
+		}
+	}
+
+	return { event, user: null, registration: null }
 }
 
 export default function EventDetailsPage({ loaderData }: Route.ComponentProps) {
-	const { event, registration } = loaderData
+	const { event, user, registration } = loaderData
 
+	const isLoggedin = !!user
 	const isRegistered = !!registration
 
 	return (
 		<div>
-			<h1>Event</h1>
 			<pre>{JSON.stringify(event)}</pre>
 
-			<ApplicationForm isRegistered={isRegistered} />
+			<h1 className="font-bold text-2xl">{event.title}</h1>
+			<p>
+				<span>meghirdetve&nbsp;</span>
+				<span>{event.createdAt}</span>
+			</p>
+			<div>
+				<img src="https://picsum.photos/400/200" alt="event" />
+			</div>
+
+			<BadgeList badges={event.tags} />
+			<ApplicationForm isRegistered={isRegistered} isLoggedin={isLoggedin} />
+
+			<div>
+				<CommentSection discussionId={event.discussion} />
+			</div>
 		</div>
 	)
 }
@@ -54,7 +91,43 @@ const schema = z.object({
 	intent: z.enum(["apply"]).default("apply"),
 })
 
-const ApplicationForm = ({ isRegistered }: { isRegistered: boolean }) => {
+export async function action({ request, params }: Route.ActionArgs) {
+	const { user } = await requireSession(request)
+	const submission = parseWithZod(await request.formData(), { schema })
+
+	if (submission.status != "success") {
+		return submission.reply()
+	}
+
+	try {
+		// insert player into the roster
+
+		// the page gets revalidated, so loader should indicate success and doesnt need to
+		// return any data trough comform, onConflictDoNothing will skip insertion
+		await db
+			.insert(registrationTable)
+			.values({
+				userId: user.id,
+				eventId: Number(params.id),
+				message: submission.value.message ?? null,
+				faction: "",
+			})
+			.onConflictDoNothing()
+
+		return submission.reply()
+	} catch (err) {
+		console.log(err)
+		return submission.reply({ formErrors: ["sikertelen jelentkezés"] })
+	}
+}
+
+const ApplicationForm = ({
+	isRegistered,
+	isLoggedin,
+}: {
+	isRegistered: boolean
+	isLoggedin: boolean
+}) => {
 	const fetcher = useFetcher()
 
 	const [form, fields] = useForm({
@@ -62,14 +135,56 @@ const ApplicationForm = ({ isRegistered }: { isRegistered: boolean }) => {
 		constraint: getZodConstraint(schema),
 	})
 
-	if (isRegistered) {
+	// TODO: event is deleted or expired
+
+	// user is logged out, encourage registraiton
+	if (!isLoggedin) {
 		return (
-			<div>
-				<span>Már jelentkeztél erre az eseményre</span>
+			<div className="flex w-full max-w-md">
+				<Item variant="outline">
+					<ItemMedia>
+						<RiAlertFill />
+					</ItemMedia>
+					<ItemContent>
+						<ItemTitle>
+							<span>
+								<Link className="underline underline-offset-4" to="/register">
+									Regisztralj
+								</Link>
+								&nbsp;ahhoz hogy jelentkezni tudj jatekra!
+							</span>
+						</ItemTitle>
+					</ItemContent>
+				</Item>
 			</div>
 		)
 	}
 
+	// already applied to this game
+	if (isRegistered) {
+		return (
+			<div className="flex w-full max-w-md">
+				<Item variant="outline">
+					<ItemMedia>
+						<RiCheckboxCircleFill />
+					</ItemMedia>
+					<ItemContent>
+						<ItemTitle>
+							<span>Mar jelentkeztel erre a jatekra!</span>
+						</ItemTitle>
+						<ItemDescription>
+							<p>A jelentkezesed sikeressegerol a szervezo fog ertesiteni</p>
+						</ItemDescription>
+					</ItemContent>
+					<ItemActions>
+						<Button variant="destructive">Visszavonom</Button>
+					</ItemActions>
+				</Item>
+			</div>
+		)
+	}
+
+	// is logged in and not registered
 	return (
 		<div>
 			<fetcher.Form method="post" {...getFormProps(form)}>
@@ -82,44 +197,16 @@ const ApplicationForm = ({ isRegistered }: { isRegistered: boolean }) => {
 	)
 }
 
-export async function action({ request, params }: Route.ActionArgs) {
-	const { user } = await requireSession(request)
-	const submission = parseWithZod(await request.formData(), { schema })
-
-	if (submission.status != "success") {
-		return submission.reply()
-	}
-
-	try {
-		// insert player into the roster
-		// TODO: transaction
-
-		// find the index of the default (0) faction in the event
-		const [faction] = await db
-			.select()
-			.from(factionsTable)
-			.where(
-				and(
-					eq(factionsTable.eventId, Number(params.id)),
-					eq(factionsTable.order, 0),
-				),
-			)
-
-		// the page gets revalidated, so loader should indicate success and doesnt need to
-		// return any data trough comform, onConflictDoNothing will skip insertion
-		await db
-			.insert(registrationTable)
-			.values({
-				userId: user.id,
-				eventId: Number(params.id),
-				message: submission.value.message ?? null,
-				factionId: faction.id,
-			})
-			.onConflictDoNothing()
-
-		return submission.reply()
-	} catch (err) {
-		console.log(err)
-		return submission.reply({ formErrors: ["sikertelen jelentkezés"] })
-	}
+const BadgeList = ({ badges }: { badges: string[] }) => {
+	return (
+		<div>
+			<ul className="flex flex-row gap-2">
+				{badges.map((b) => (
+					<li key={b}>
+						<Badge>{b}</Badge>
+					</li>
+				))}
+			</ul>
+		</div>
+	)
 }

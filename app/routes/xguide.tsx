@@ -1,6 +1,7 @@
 import "@cap.js/widget"
 import { useEffect, useState } from "react"
 import SearchContainer from "~/components/Search"
+import { Button } from "~/components/ui/button"
 import { env } from "~/services/env.server"
 import type { Route } from "./+types/xguide"
 
@@ -23,12 +24,7 @@ export default function StyleGuide({ loaderData }: Route.ComponentProps) {
 					placeholder="you@example.com"
 				/>
 
-				<button type="submit" className="btn btn-primary">
-					hello
-				</button>
-				<button type="submit" className="btn btn-secondary">
-					hello
-				</button>
+				<Button type="submit">hello</Button>
 			</div>
 
 			<SearchContainer />

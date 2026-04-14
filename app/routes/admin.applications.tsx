@@ -1,8 +1,5 @@
 import React, { Suspense } from "react"
-import {
-	type OrganizerApplicationsSelect,
-	organizerApplicationsTable,
-} from "~/schema/schema"
+import { organizerApplicationsTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/admin.applications"
 
