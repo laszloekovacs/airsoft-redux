@@ -9,4 +9,8 @@ redis.on("error", (err) => console.log("Redis client error: ", err))
 
 await redis.connect()
 
+export const getReddis = () => {
+	return redis.duplicate()
+}
+
 console.log("redis client started")
