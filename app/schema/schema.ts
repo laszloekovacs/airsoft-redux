@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm"
-import { date, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core"
+import {
+	date,
+	integer,
+	pgEnum,
+	pgTable,
+	text,
+	timestamp,
+} from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
 
 export const loggingTable = pgTable("loggin", {
@@ -28,6 +35,10 @@ export const eventTable = pgTable("event", {
 
 	createdAt: date().defaultNow().notNull(),
 	deletedAt: date(),
+
+	discussion: integer().references(() => discussionTable.id, {
+		onDelete: "set null",
+	}),
 })
 
 // players registered up to the event
@@ -39,4 +50,20 @@ export const registrationTable = pgTable("registration", {
 	createdAt: date().defaultNow().notNull(),
 	// name of faction, null or empty means unasigned
 	faction: text(),
+})
+
+// holds the comment section, other tables and comments have references to this
+export const discussionTable = pgTable("discussion", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+})
+
+// holds a comment by user
+export const commentTable = pgTable("comment", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	discussionId: integer().references(() => discussionTable.id, {
+		onDelete: "cascade",
+	}),
+	userId: text().references(() => user.id, { onDelete: "set null" }),
+	message: text(),
+	createdAt: timestamp().defaultNow().notNull(),
 })
