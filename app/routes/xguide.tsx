@@ -1,67 +1,41 @@
-import "@cap.js/widget"
-import { useEffect, useState } from "react"
-import SearchContainer from "~/components/Search"
-import { Button } from "~/components/ui/button"
-import { env } from "~/services/env.server"
+import { useEffect, useRef } from "react"
 import type { Route } from "./+types/xguide"
-import { Form } from "react-router"
 
-export const loader = () => {
-	// get the api endpoint url from env
-	return { cap_endpoint: env.CAP_CONNECTION_STRING }
+export function useSharedWorker(onMessage: (data: string) => void) {
+	const workerRef = useRef<SharedWorker>(null)
+
+	useEffect(() => {
+		const worker = new SharedWorker("/shared-worker.js")
+		workerRef.current = worker
+
+		worker.port.onmessage = (event) => {
+			onMessage?.(event.data)
+		}
+
+		worker.port.start()
+
+		return () => {
+			worker.port.close()
+		}
+	}, [onMessage])
+
+	const send = (msg: string) => {
+		workerRef.current?.port.postMessage(msg)
+	}
+
+	return { send }
 }
 
 export default function StyleGuide({ loaderData }: Route.ComponentProps) {
-	return (
-		<div className="flex flex-col items-center w-full p-12">
-			<div className="max-w-sm panel-border p-8">
-				<label htmlFor="email" className="input-label">
-					Email Address
-				</label>
-				<input
-					type="email"
-					id="email"
-					className="input-field"
-					placeholder="you@example.com"
-				/>
+	const { send } = useSharedWorker((msg) => {
+		console.log("recieved:", msg)
+	})
 
-				<Button type="submit">hello</Button>
-			</div>
-
-			<Form method="post" action="/api/presence">
-				<button type="submit">call</button>
-			</Form>
-
-			<SearchContainer />
-		</div>
-	)
-}
-
-//<CappedForm endpoint={loaderData.cap_endpoint} />
-// TODO: lift up state from widget with callbacks
-const CappedForm = ({ endpoint }: { endpoint: string }) => {
-	const [isMounted, setMounted] = useState(false)
-
-	useEffect(() => {
-		setMounted(true)
-	}, [])
-
-	if (!isMounted) {
-		return <div>loading...</div>
-	}
-
-	// submit form to action, the token will be added to the form (?cap_token=...)
 	return (
 		<div>
-			<form>
-				<cap-widget
-					data-cap-api-endpoint={endpoint}
-					onsolve={(e) => console.log("token:", e.detail.token)}
-					onprogress={(e) => console.log(e.detail.progress)}
-					onerror={(e) => console.error(e.detail.message)}
-				/>
-				<button type="submit">Submit</button>
-			</form>
+			<button className="border" type="submit" onClick={() => send("echo")}>
+				send
+			</button>
 		</div>
 	)
 }
