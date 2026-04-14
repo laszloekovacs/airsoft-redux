@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import type { Route } from "./+types/xguide"
 
-export function useSharedWorker(onMessage: (data: string) => void) {
+export function useSharedWorker(onMessage: (data: string) => void, id: string) {
 	const workerRef = useRef<SharedWorker>(null)
 
 	useEffect(() => {
@@ -20,7 +20,7 @@ export function useSharedWorker(onMessage: (data: string) => void) {
 	}, [onMessage])
 
 	const send = (msg: string) => {
-		workerRef.current?.port.postMessage(msg)
+		workerRef.current?.port.postMessage({ msg, id })
 	}
 
 	return { send }
@@ -29,7 +29,7 @@ export function useSharedWorker(onMessage: (data: string) => void) {
 export default function StyleGuide({ loaderData }: Route.ComponentProps) {
 	const { send } = useSharedWorker((msg) => {
 		console.log("recieved:", msg)
-	})
+	}, "mike")
 
 	return (
 		<div>
