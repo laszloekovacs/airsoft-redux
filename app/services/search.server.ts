@@ -1,7 +1,8 @@
 import type { eventTable } from "~/schema/schema"
-import { redis } from "./redis.server"
+import { getRedis } from "./redis.server"
 
 export async function createEventSchema() {
+	const redis = getRedis()
 	try {
 		await redis.ft.dropIndex("idx:event", { DD: true })
 	} catch {} // silently ignore error
@@ -21,6 +22,7 @@ export async function createEventSchema() {
 
 // create an entry in redis from an event
 export async function indexEvent(event: typeof eventTable.$inferSelect) {
+	const redis = getRedis()
 	await redis.json.set(`event:${event.id}`, "$", {
 		id: event.id,
 		title: event.title,
@@ -28,6 +30,7 @@ export async function indexEvent(event: typeof eventTable.$inferSelect) {
 }
 
 export async function removeEvent(eventId: string) {
+	const redis = getRedis()
 	await redis.json.del(`event:${eventId}`)
 }
 
@@ -35,6 +38,7 @@ export async function removeEvent(eventId: string) {
 export async function searchEvents(query: string) {
 	// TODO: filtering
 	const ftQuery = `@title:${query}*`
+	const redis = getRedis()
 
 	const results = await redis.ft.search("idx:event", ftQuery, {
 		RETURN: ["id", "title"],

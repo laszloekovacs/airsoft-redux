@@ -13,17 +13,18 @@ onconnect = (event) => {
 		const { userId } = event.data
 
 		// Start interval only once
+		// depending on the browser, shared workers are low priority,
+		// interval might fire less recently than set
 		if (!pingInterval) {
 			pingInterval = setInterval(() => {
 				fetch(`/api/presence/${userId}`, {
 					method: "POST",
-					body: "online",
 				})
-			}, 2_000)
+			}, 30_000)
 		}
 	}
 
-	// probably gets unloaded anyway when all tabs close anyway
+	// probably gets unloaded anyway when all tabs close
 	port.onclose = () => {
 		ports = ports.filter((p) => p !== port)
 
@@ -31,12 +32,6 @@ onconnect = (event) => {
 		if (ports.length === 0) {
 			clearInterval(pingInterval)
 			pingInterval = null
-
-			// send an expire message
-			fetch(`/api/presence/${userId}`, {
-				method: "POST",
-				body: "offline",
-			})
 		}
 	}
 }

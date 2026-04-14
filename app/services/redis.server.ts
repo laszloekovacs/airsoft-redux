@@ -10,7 +10,7 @@ await redis.connect()
 
 const subscription = redis.duplicate()
 
-export const getReddis = () => redis
+export const getRedis = () => redis
 export const getSubscipton = () => subscription
 
 console.log("redis client started")
