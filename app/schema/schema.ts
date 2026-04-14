@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import {
+	boolean,
 	date,
 	integer,
 	pgEnum,
@@ -55,6 +56,7 @@ export const registrationTable = pgTable("registration", {
 // holds the comment section, other tables and comments have references to this
 export const discussionTable = pgTable("discussion", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	active: boolean().default(true),
 })
 
 // holds a comment by user

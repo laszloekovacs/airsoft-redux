@@ -20,6 +20,7 @@ import {
 import { RiAlertFill, RiCheckboxCircleFill } from "@remixicon/react"
 import { Button } from "~/components/ui/button"
 import { Badge } from "~/components/ui/badge"
+import { CommentSection } from "~/features/comments"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	// does not require auth, but should only allow logged in users to sign up
@@ -77,6 +78,10 @@ export default function EventDetailsPage({ loaderData }: Route.ComponentProps) {
 
 			<BadgeList badges={event.tags} />
 			<ApplicationForm isRegistered={isRegistered} isLoggedin={isLoggedin} />
+
+			<div>
+				<CommentSection discussionId={event.discussion} />
+			</div>
 		</div>
 	)
 }
