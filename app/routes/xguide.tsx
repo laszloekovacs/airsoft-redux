@@ -4,6 +4,7 @@ import SearchContainer from "~/components/Search"
 import { Button } from "~/components/ui/button"
 import { env } from "~/services/env.server"
 import type { Route } from "./+types/xguide"
+import { Form } from "react-router"
 
 export const loader = () => {
 	// get the api endpoint url from env
@@ -26,6 +27,10 @@ export default function StyleGuide({ loaderData }: Route.ComponentProps) {
 
 				<Button type="submit">hello</Button>
 			</div>
+
+			<Form method="post" action="/api/presence">
+				<button type="submit">call</button>
+			</Form>
 
 			<SearchContainer />
 		</div>
