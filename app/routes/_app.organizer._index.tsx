@@ -1,9 +1,5 @@
 import { eq } from "drizzle-orm"
 import { Link } from "react-router"
-import requireSession from "~/functions/requiresession"
-import { eventTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/_app.organizer._index"
 import {
 	Table,
 	TableBody,
@@ -12,6 +8,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table"
+import requireSession from "~/functions/requiresession"
+import { eventTable } from "~/schema/schema"
+import { db } from "~/services/drizzle.server"
+import type { Route } from "./+types/_app.organizer._index"
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)

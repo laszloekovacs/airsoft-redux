@@ -2,14 +2,14 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { Form, redirect } from "react-router"
 import z from "zod"
+import { Button } from "~/components/ui/button"
+import { FieldError, FieldGroup, FieldLabel } from "~/components/ui/field"
+import { Input } from "~/components/ui/input"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.organizer.events.new"
-import { FieldError, FieldGroup, FieldLabel } from "~/components/ui/field"
-import { Input } from "~/components/ui/input"
-import { Button } from "~/components/ui/button"
 
 const schema = z.object({
 	title: z

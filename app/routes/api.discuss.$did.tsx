@@ -1,9 +1,9 @@
+import { parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
+import { z } from "zod/v4"
 import { commentTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/api.discuss.$did"
-import { parseWithZod } from "@conform-to/zod/v4"
-import { z } from "zod/v4"
 
 // load comments, the parameter is the discussion table id
 export async function loader({ params }: Route.LoaderArgs) {
@@ -42,13 +42,11 @@ export async function action({ params, request }: Route.ActionArgs) {
 	}
 
 	// insert new comment
-	await db
-		.insert(commentTable)
-		.values({
-			discussionId: Number(did),
-			message: submission.value.message,
-			userId: null,
-		})
+	await db.insert(commentTable).values({
+		discussionId: Number(did),
+		message: submission.value.message,
+		userId: null,
+	})
 
 	return submission
 }

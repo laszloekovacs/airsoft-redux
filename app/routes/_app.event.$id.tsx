@@ -1,14 +1,11 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
+import { RiAlertFill, RiCheckboxCircleFill } from "@remixicon/react"
 import { and, eq } from "drizzle-orm"
 import { Link, useFetcher } from "react-router"
 import z from "zod"
-import expectOne from "~/functions/expectone"
-import requireSession from "~/functions/requiresession"
-import { eventTable, registrationTable } from "~/schema/schema"
-import { auth } from "~/services/auth.server"
-import { db } from "~/services/drizzle.server"
-import type { Route } from "./+types/_app.event.$id"
+import { Badge } from "~/components/ui/badge"
+import { Button } from "~/components/ui/button"
 import {
 	Item,
 	ItemActions,
@@ -17,10 +14,13 @@ import {
 	ItemMedia,
 	ItemTitle,
 } from "~/components/ui/item"
-import { RiAlertFill, RiCheckboxCircleFill } from "@remixicon/react"
-import { Button } from "~/components/ui/button"
-import { Badge } from "~/components/ui/badge"
 import { CommentSection } from "~/features/comments"
+import expectOne from "~/functions/expectone"
+import requireSession from "~/functions/requiresession"
+import { eventTable, registrationTable } from "~/schema/schema"
+import { auth } from "~/services/auth.server"
+import { db } from "~/services/drizzle.server"
+import type { Route } from "./+types/_app.event.$id"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	// does not require auth, but should only allow logged in users to sign up

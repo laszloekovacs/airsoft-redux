@@ -1,9 +1,9 @@
 import "@cap.js/widget"
 import { useEffect, useState } from "react"
 import SearchContainer from "~/components/Search"
+import { Button } from "~/components/ui/button"
 import { env } from "~/services/env.server"
 import type { Route } from "./+types/xguide"
-import { Button } from "~/components/ui/button"
 
 export const loader = () => {
 	// get the api endpoint url from env
