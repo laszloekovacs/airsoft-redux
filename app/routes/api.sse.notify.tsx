@@ -5,11 +5,12 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 	const stream = new ReadableStream({
 		async start(controller) {
 			console.log("sse endpoint connected")
+
 			const subscription = getSubscipton()
 
-			// TODO: investigate if encoding is correct
 			subscription.subscribe("notification", (message) => {
-				controller.enqueue(message)
+				const payload = `data: ${message}\n\n`
+				controller.enqueue(new TextEncoder().encode(payload))
 			})
 		},
 	})

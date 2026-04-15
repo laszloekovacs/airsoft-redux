@@ -13,7 +13,7 @@ export const sendNotification = async ({
 	// record it into the database
 	await db.insert(notificationTable).values({
 		userId,
-		content,
+		content: JSON.stringify(content),
 	})
 
 	// also try to deliver if he's online by publishing to redis

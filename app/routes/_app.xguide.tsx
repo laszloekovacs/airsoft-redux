@@ -15,7 +15,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 export default function TestingPage({ loaderData }: Route.ComponentProps) {
 	const { userId } = loaderData
 
-	const source = useEventSource("/api/sse/notify", (e) => console.log(e))
+	const source = useEventSource("/api/sse/notify", (e) => {
+		const data = JSON.parse(e.data)
+		console.log(data)
+	})
 
 	return (
 		<div>
@@ -34,7 +37,10 @@ export const action = async ({ request }: Route.ActionArgs) => {
 
 	const userId = sessionData?.user.id
 	console.log("action called")
-	await sendNotification({ userId: userId ?? "1", content: "hello world" })
+	await sendNotification({
+		userId: userId ?? "1",
+		content: JSON.stringify({ message: "hello world" }),
+	})
 
 	return {}
 }
