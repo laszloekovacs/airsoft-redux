@@ -1,41 +1,40 @@
-import { useEffect, useRef } from "react"
-import type { Route } from "./+types/xguide"
+import { Form } from "react-router"
+import { useEventSource } from "~/components/useEventSource"
+import { sendNotification } from "~/functions/send-notification.server"
+import { auth } from "~/services/auth.server"
+import type { Route } from "./+types/_app.xguide"
 
-export function useSharedWorker(onMessage: (data: string) => void, id: string) {
-	const workerRef = useRef<SharedWorker>(null)
+export const loader = async ({ request }: Route.LoaderArgs) => {
+	const sessionData = await auth.api.getSession(request)
 
-	useEffect(() => {
-		const worker = new SharedWorker("/shared-worker.js")
-		workerRef.current = worker
+	const userId = sessionData?.user.id
 
-		worker.port.onmessage = (event) => {
-			onMessage?.(event.data)
-		}
-
-		worker.port.start()
-
-		return () => {
-			worker.port.close()
-		}
-	}, [onMessage])
-
-	const send = (msg: string) => {
-		workerRef.current?.port.postMessage({ msg, id })
-	}
-
-	return { send }
+	return { userId }
 }
 
-export default function StyleGuide({ loaderData }: Route.ComponentProps) {
-	const { send } = useSharedWorker((msg) => {
-		console.log("recieved:", msg)
-	}, "mike")
+export default function TestingPage({ loaderData }: Route.ComponentProps) {
+	const { userId } = loaderData
+
+	const source = useEventSource("/api/sse/notify", (e) => console.log(e))
 
 	return (
 		<div>
-			<button className="border" type="submit" onClick={() => send("echo")}>
-				send
-			</button>
+			<div>
+				<Form method="post">
+					<button type="submit">send</button>
+					<pre>{JSON.stringify(source)}</pre>
+				</Form>
+			</div>
 		</div>
 	)
+}
+
+export const action = async ({ request }: Route.ActionArgs) => {
+	const sessionData = await auth.api.getSession(request)
+
+	const userId = sessionData?.user.id
+	console.log("action called")
+	await sendNotification({ userId: userId ?? "1", content: "hello world" })
+
+	return {}
 }

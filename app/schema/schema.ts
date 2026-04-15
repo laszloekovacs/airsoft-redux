@@ -69,3 +69,12 @@ export const commentTable = pgTable("comment", {
 	message: text(),
 	createdAt: timestamp().defaultNow().notNull(),
 })
+
+// alerts sent to the user
+export const notificationTable = pgTable("notifications", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	// the user recieving the message
+	userId: text().references(() => user.id, { onDelete: "cascade" }),
+	content: text(),
+	createdAt: timestamp().defaultNow().notNull(),
+})
