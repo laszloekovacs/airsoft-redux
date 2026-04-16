@@ -3,11 +3,11 @@ import { PageHeader } from "~/components/header"
 import { HeaderLinks } from "~/components/headerlinks"
 import { HeartbeatProvider } from "~/components/HeartbeatProvider"
 import { SessionInfo } from "~/components/ui/sessioninfo"
-import { auth } from "~/services/auth.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_app"
 
 export async function loader({ request }: Route.ActionArgs) {
-	const sessionData = await auth.api.getSession(request)
+	const sessionData = await airsoft.auth.api.getSession(request)
 
 	return { sessionData }
 }

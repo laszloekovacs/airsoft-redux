@@ -26,4 +26,20 @@ export const getRedis = () => redis
 export const getSubscipton = () => subscription
 export const getPublishing = () => publishing
 
+const createRedisClient = (url: string) => {
+	const client = createClient({ url })
+
+	client.on("error", (err) => {
+		log.error({ err }, "Redis client error")
+	})
+
+	return client
+}
+
+export const redisNs = {
+	general: createRedisClient(env.REDIS_CONNECTION_STRING),
+	pub: createRedisClient(env.REDIS_CONNECTION_STRING),
+	sub: createRedisClient(env.REDIS_CONNECTION_STRING),
+}
+
 log.info("redis clients started")
