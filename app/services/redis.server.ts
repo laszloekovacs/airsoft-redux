@@ -33,6 +33,8 @@ const createRedisClient = (url: string) => {
 		log.error({ err }, "Redis client error")
 	})
 
+	client.connect()
+
 	return client
 }
 
