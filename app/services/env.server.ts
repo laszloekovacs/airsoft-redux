@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { log } from "./pino.server"
 
 const defaultConnectionString = "postgres://postgres:5435@localhost/airsoft"
 const defaultAuthSecret = "dummy_secret_dummy_secret_dummy_secret"
@@ -23,5 +24,6 @@ const envSchema = z.object({
 })
 
 const _env = envSchema.parse(process.env)
-
 export const env = _env
+
+log.info("env variables parsed and verified")

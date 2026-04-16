@@ -1,5 +1,6 @@
 import { createClient } from "redis"
 import { env } from "~/services/env.server"
+import { log } from "./pino.server"
 
 const redis = createClient({
 	url: env.REDIS_CONNECTION_STRING,
@@ -25,4 +26,4 @@ export const getRedis = () => redis
 export const getSubscipton = () => subscription
 export const getPublishing = () => publishing
 
-console.log("redis clients started")
+log.info("redis clients started")
