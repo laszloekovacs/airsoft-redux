@@ -36,8 +36,8 @@ const createRedisClient = (url: string) => {
 	return client
 }
 
-export const redisNs = {
-	general: createRedisClient(env.REDIS_CONNECTION_STRING),
+export const redisNamespace = {
+	redis: createRedisClient(env.REDIS_CONNECTION_STRING),
 	pub: createRedisClient(env.REDIS_CONNECTION_STRING),
 	sub: createRedisClient(env.REDIS_CONNECTION_STRING),
 }
