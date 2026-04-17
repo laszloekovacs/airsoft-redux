@@ -10,14 +10,14 @@ import {
 } from "~/components/ui/table"
 import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer._index"
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
 
 	// list users organized events
-	const events = await db
+	const events = await airsoft.db
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.userId, user.id))

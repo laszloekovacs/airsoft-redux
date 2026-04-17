@@ -8,7 +8,7 @@ import { Input } from "~/components/ui/input"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.new"
 
 const schema = z.object({
@@ -70,7 +70,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	// TODO: transaction
 	// create an event in the database with a provided name
-	const result = await db
+	const result = await airsoft.db
 		.insert(eventTable)
 		.values({
 			title: submission.value.title,

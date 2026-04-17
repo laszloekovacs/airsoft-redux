@@ -1,11 +1,11 @@
 import { Outlet } from "react-router"
 import requireSession from "~/functions/requiresession"
-import { auth } from "~/services/auth.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer"
 
 export async function loader({ request }: Route.LoaderArgs) {
 	// route guard
-	const permission = await auth.api.userHasPermission({
+	const permission = await airsoft.auth.api.userHasPermission({
 		body: {
 			role: "user",
 			permissions: {
