@@ -2,6 +2,7 @@ import { Link } from "react-router"
 import { eventTable } from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app._index"
+import { gt, asc } from "drizzle-orm"
 
 export function meta(_args: Route.MetaArgs) {
 	return [
@@ -10,19 +11,32 @@ export function meta(_args: Route.MetaArgs) {
 	]
 }
 
-export async function loader() {
-	// fetch new events
-	const events = await db.select().from(eventTable).limit(10)
+const LIMIT = 6
 
-	return { events }
+export async function loader({ request }: Route.LoaderArgs) {
+	const url = new URL(request.url)
+	const cursor = Number(url.searchParams.get("cursor"))
+
+	const events = await db
+		.select()
+		.from(eventTable)
+		.where(cursor ? gt(eventTable.id, cursor) : undefined)
+		.orderBy(asc(eventTable.id))
+		.limit(LIMIT)
+
+	const hasMore = events.length == LIMIT
+	const items = hasMore ? events.slice(0, LIMIT - 1) : events
+	const nextCursor = hasMore ? items[items.length - 1].id : null
+
+	return { events: items, hasMore, nextCursor }
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-	const { events } = loaderData
+	const { events, nextCursor } = loaderData
 
 	return (
 		<div>
-			<EventList events={events} />
+			<EventList events={events} nextCursor={nextCursor} />
 		</div>
 	)
 }
@@ -30,28 +44,30 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 // list events
 const EventList = ({
 	events,
+	nextCursor,
 }: {
 	events?: (typeof eventTable.$inferSelect)[]
+	nextCursor: number | null
 }) => {
-	if (!events || events?.length == 0) {
-		return <div>nincs aktualis esemeny</div>
+	if (!events || events.length == 0) {
+		return <div>nincs aktuális esemény</div>
 	}
-
-	const list = events?.map((item) => (
-		<li key={item.id}>
-			<div className="mb-6">
-				<Link to={`/event/${item.id}`}>
-					<p>{item.title}</p>
-					<img src="https://picsum.photos/400/200" alt="event" />
-				</Link>
-			</div>
-		</li>
-	))
 
 	return (
 		<div>
-			<p>Esmenyek</p>
-			<ul>{list}</ul>
+			<p>Események</p>
+
+			<ul>
+				{events.map((item) => (
+					<li key={item.id} className="mb-6">
+						<Link to={`/event/${item.id}`}>
+							<p>{item.title}</p>
+							<img src="https://picsum.photos/400/300" alt="event" />
+						</Link>
+					</li>
+				))}
+			</ul>
+			{nextCursor && <Link to={`?cursor=${nextCursor}`}>Következő oldal</Link>}
 		</div>
 	)
 }
