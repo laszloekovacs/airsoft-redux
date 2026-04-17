@@ -12,8 +12,7 @@ import {
 	FieldLabel,
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-import { auth } from "~/services/auth.server"
-import { logger } from "~/services/pino.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_auth.register"
 
 const schema = z.object({
@@ -113,7 +112,7 @@ export async function action({ request }: Route.ActionArgs) {
 	}
 
 	try {
-		const authResponse = await auth.api.signUpEmail({
+		const authResponse = await airsoft.auth.api.signUpEmail({
 			body: {
 				username: submission.value.username,
 				name: submission.value.username,
@@ -139,7 +138,7 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 		})
 	} catch (error) {
-		logger.error(error)
+		airsoft.log.error(error)
 
 		if (isAPIError(error)) {
 			return submission.reply({
