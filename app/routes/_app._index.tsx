@@ -11,7 +11,7 @@ export function meta(_args: Route.MetaArgs) {
 	]
 }
 
-const LIMIT = 6
+const LIMIT = 4
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
