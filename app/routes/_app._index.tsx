@@ -22,10 +22,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 		.from(eventTable)
 		.where(cursor ? gt(eventTable.id, cursor) : undefined)
 		.orderBy(asc(eventTable.id))
-		.limit(LIMIT)
+		.limit(LIMIT + 1)
 
-	const hasMore = events.length == LIMIT
-	const items = hasMore ? events.slice(0, LIMIT - 1) : events
+	const hasMore = events.length == LIMIT + 1
+	const items = hasMore ? events.slice(0, LIMIT) : events
 	const nextCursor = hasMore ? items[items.length - 1].id : null
 
 	return { events: items, hasMore, nextCursor }
