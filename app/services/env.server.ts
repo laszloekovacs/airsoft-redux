@@ -16,6 +16,7 @@ const envSchema = z.object({
 	STORAGE_DRIVER: z.enum(["picsum"]).default(defaultStorageDriver),
 
 	CAP_CONNECTION_STRING: z.string(),
+	CAP_APIKEY: z.string(),
 
 	UMAMI_URL: z.string(),
 	UMAMI_ID: z.string(),
