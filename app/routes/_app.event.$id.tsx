@@ -18,15 +18,14 @@ import { CommentSection } from "~/features/comments"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
 import { eventTable, registrationTable } from "~/schema/schema"
-import { auth } from "~/services/auth.server"
-import { db } from "~/services/drizzle.server"
 import type { Route } from "./+types/_app.event.$id"
+import { airsoft } from "~/services"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	// does not require auth, but should only allow logged in users to sign up
-	const sessionData = await auth.api.getSession(request)
+	const sessionData = await airsoft.auth.api.getSession(request)
 
-	const events = await db
+	const events = await airsoft.db
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.id, Number(params.id)))
@@ -37,7 +36,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 	// if authed user,
 	// check if user has a registration for this event, if logged in
 	if (sessionData?.user != null) {
-		const [registration] = await db
+		const registrations = await airsoft.db
 			.select()
 			.from(registrationTable)
 			.where(
@@ -50,18 +49,19 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 		return {
 			event,
 			user: sessionData.user,
-			registration: registration ?? null,
+			registrations,
 		}
 	}
 
-	return { event, user: null, registration: null }
+	return { event, user: null, registrations: [] }
 }
 
 export default function EventDetailsPage({ loaderData }: Route.ComponentProps) {
-	const { event, user, registration } = loaderData
+	const { event, user, registrations } = loaderData
 
 	const isLoggedin = !!user
-	const isRegistered = !!registration
+	const isRegistered = !!registrations.filter((r) => r.userId == user?.id)
+		.length
 
 	return (
 		<div>
@@ -78,6 +78,8 @@ export default function EventDetailsPage({ loaderData }: Route.ComponentProps) {
 
 			<BadgeList badges={event.tags} />
 			<ApplicationForm isRegistered={isRegistered} isLoggedin={isLoggedin} />
+
+			<Registrations registrations={registrations} />
 
 			<div>
 				<CommentSection discussionId={event.discussion} />
@@ -104,7 +106,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 		// the page gets revalidated, so loader should indicate success and doesnt need to
 		// return any data trough comform, onConflictDoNothing will skip insertion
-		await db
+		await airsoft.db
 			.insert(registrationTable)
 			.values({
 				userId: user.id,
@@ -209,4 +211,29 @@ const BadgeList = ({ badges }: { badges: string[] }) => {
 			</ul>
 		</div>
 	)
+}
+
+const Registrations = ({
+	registrations,
+}: {
+	registrations: (typeof registrationTable.$inferSelect)[] | null
+}) => {
+	if (!registrations || registrations.length == 0) {
+		return <div>még nincsenek jelentkezők erre a játékra!</div>
+	}
+
+	// before grouping, fill out the null faction values, so groupby has keys to iterate on
+	const result = registrations.map((r) => {
+		if (!r.faction) {
+			r.faction == "várólista"
+		}
+		return r
+	})
+
+	const factions = Object.groupBy(
+		result,
+		({ faction }) => faction ?? "várólista",
+	)
+
+	return <pre>{JSON.stringify(factions, null, 2)}</pre>
 }

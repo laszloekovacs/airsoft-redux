@@ -3,13 +3,13 @@ import { Link } from "react-router"
 import expectOne from "~/functions/expectone"
 import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.$eid._index"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
 
-	const events = await db
+	const events = await airsoft.db
 		.select()
 		.from(eventTable)
 		.where(

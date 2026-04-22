@@ -1,20 +1,19 @@
 import { drizzle } from "drizzle-orm/bun-sql"
 import { env } from "~/services/env.server"
+import { log } from "./pino.server"
 
-const db = drizzle(env.DATABASE_URL)
+export const db = drizzle(env.DATABASE_URL)
 
 try {
 	await db.execute("SELECT 1")
-	console.info("connected to db")
+	log.info("drizzle created a connection to postgres")
 } catch (error) {
-	console.error("db connection failed, is the connection string correct?")
+	log.error("drizzle db connection failed, is the connection string correct?")
 
 	if (error instanceof Error) {
-		console.error(`Message: ${error.message}`)
+		log.error(`Message: ${error.message}`)
 	}
 
 	// kill process if cant connect to db
 	process.exit(1)
 }
-
-export { db }

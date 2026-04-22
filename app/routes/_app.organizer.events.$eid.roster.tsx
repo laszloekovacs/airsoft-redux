@@ -7,7 +7,7 @@ import { requireRole } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, registrationTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.$eid.roster"
 
 const assignmentSchema = z.object({
@@ -30,7 +30,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 	// check for intent of assign, modify registrations
 	if (submission.value.intent == "assignToFaction") {
 		// TODO: use registration id not user id
-		await db
+		await airsoft.db
 			.update(registrationTable)
 			.set({ faction: submission.value.faction ?? null })
 			.where(eq(registrationTable.id, submission.value.regId))
@@ -41,7 +41,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 
 export async function loader({ params }: Route.LoaderArgs) {
 	// get the relevant event
-	const events = await db
+	const events = await airsoft.db
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.id, Number(params.eid)))
@@ -49,7 +49,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 	// fetch the registrations relevant to this event
 	// join with user info
-	const registrations = await db
+	const registrations = await airsoft.db
 		.select()
 		.from(registrationTable)
 		.where(eq(registrationTable.eventId, Number(params.eid)))
@@ -100,13 +100,7 @@ const Registrations = ({ registrations }: { registrations: RowType[] }) => {
 	)
 }
 
-const RegistrationsRow = ({
-	reg,
-	factions,
-}: {
-	reg: RowType
-	factions: string[]
-}) => {
+const RegistrationsRow = ({ reg }: { reg: RowType; factions: string[] }) => {
 	const fetcher = useFetcher()
 
 	const [form, field] = useForm({

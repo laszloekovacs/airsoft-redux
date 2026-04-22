@@ -1,5 +1,5 @@
 import { Form } from "react-router"
-import { useEventSource } from "~/components/useEventSource"
+import { useEventSource } from "~/functions/useEventSource"
 import { sendNotification } from "~/functions/send-notification.server"
 import { auth } from "~/services/auth.server"
 import type { Route } from "./+types/_app.xguide"

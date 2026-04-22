@@ -1,5 +1,6 @@
 import { createClient } from "redis"
 import { env } from "~/services/env.server"
+import { log } from "./pino.server"
 
 const redis = createClient({
 	url: env.REDIS_CONNECTION_STRING,
@@ -25,4 +26,22 @@ export const getRedis = () => redis
 export const getSubscipton = () => subscription
 export const getPublishing = () => publishing
 
-console.log("redis clients started")
+const createRedisClient = (url: string) => {
+	const client = createClient({ url })
+
+	client.on("error", (err) => {
+		log.error({ err }, "Redis client error")
+	})
+
+	client.connect()
+
+	return client
+}
+
+export const redisNamespace = {
+	redis: createRedisClient(env.REDIS_CONNECTION_STRING),
+	pub: createRedisClient(env.REDIS_CONNECTION_STRING),
+	sub: createRedisClient(env.REDIS_CONNECTION_STRING),
+}
+
+log.info("redis clients started")

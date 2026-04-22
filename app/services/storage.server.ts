@@ -1,4 +1,5 @@
 import { env } from "./env.server"
+import { log } from "./pino.server"
 import { PicsumStorageDriver } from "./storage.picsum.server"
 
 // implement this for s3 or local for example
@@ -20,3 +21,5 @@ function createStorageDriver(): StorageDriver {
 }
 
 export const storage = createStorageDriver()
+
+log.info(`storage ready with ${env.STORAGE_DRIVER} driver`)

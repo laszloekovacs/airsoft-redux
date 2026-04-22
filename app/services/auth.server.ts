@@ -7,6 +7,7 @@ import * as schema from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import { env } from "./env.server"
 import { ac, admin, organizer, user } from "./permissions.server"
+import { log } from "./pino.server"
 
 export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
@@ -45,4 +46,6 @@ export const auth = betterAuth({
 	],
 })
 
-export type SessionData = typeof auth.$Infer.Session 
+export type SessionData = typeof auth.$Infer.Session
+
+log.info("better auth api created")

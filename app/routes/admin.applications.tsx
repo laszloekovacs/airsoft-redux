@@ -1,11 +1,11 @@
 import React, { Suspense } from "react"
 import { organizerApplicationsTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/admin.applications"
 
 export async function loader(_args: Route.LoaderArgs) {
 	// load applications
-	const applicationsPromise = db
+	const applicationsPromise = airsoft.db
 		.select()
 		.from(organizerApplicationsTable)
 		.execute()
@@ -30,7 +30,7 @@ export default function Applications({ loaderData }: Route.ComponentProps) {
 }
 
 type ApplicationListProps = {
-	listPromise: Promise<OrganizerApplicationsSelect[]>
+	listPromise: Promise<(typeof organizerApplicationsTable.$inferSelect)[]>
 }
 
 const ApplicaitonList = ({ listPromise }: ApplicationListProps) => {

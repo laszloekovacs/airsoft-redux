@@ -5,7 +5,7 @@ import { useFetcher } from "react-router"
 import z from "zod"
 import expectOne from "~/functions/expectone"
 import { eventTable } from "~/schema/schema"
-import { db } from "~/services/drizzle.server"
+import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.$eid.tags"
 
 const schema = z.object({
@@ -15,7 +15,7 @@ const schema = z.object({
 
 export const loader = async ({ params }: Route.LoaderArgs) => {
 	const event = expectOne(
-		await db
+		await airsoft.db
 			.select()
 			.from(eventTable)
 			.where(eq(eventTable.id, Number(params.eid))),
@@ -74,7 +74,7 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
 	console.log(submission)
 
 	if (submission.value.intent === "addTag") {
-		await db
+		await airsoft.db
 			.update(eventTable)
 			.set({
 				tags: sql`
@@ -91,7 +91,7 @@ export const action = async ({ params, request }: Route.ActionArgs) => {
 	}
 
 	if (submission.value.intent == "removeTag") {
-		await db
+		await airsoft.db
 			.update(eventTable)
 			.set({
 				tags: sql`array_remove(${eventTable.tags}, ${submission.value.tag})`,
