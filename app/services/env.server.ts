@@ -15,8 +15,8 @@ const envSchema = z.object({
 	BETTER_AUTH_URL: z.string().default(defaultAuthUrl),
 	STORAGE_DRIVER: z.enum(["picsum"]).default(defaultStorageDriver),
 
+	// url with apikey included
 	CAP_CONNECTION_STRING: z.string(),
-	CAP_APIKEY: z.string(),
 
 	UMAMI_URL: z.string(),
 	UMAMI_ID: z.string(),
