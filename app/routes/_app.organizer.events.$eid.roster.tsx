@@ -3,7 +3,7 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { useFetcher } from "react-router"
 import z from "zod"
-import { requireRole } from "~/functions/auth-guard.server"
+import { requireClaim } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, registrationTable } from "~/schema/schema"
@@ -17,7 +17,7 @@ const assignmentSchema = z.object({
 })
 
 export async function action({ params, request }: Route.ActionArgs) {
-	const { user } = await requireRole(request, "organizer")
+	const { user } = await requireClaim(request, "organizer")
 	// TODO: check if this is the users event
 
 	const formData = await request.formData()
