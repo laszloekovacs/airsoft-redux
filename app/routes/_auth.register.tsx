@@ -3,6 +3,7 @@ import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
 import { Form, Link, redirect, useNavigation } from "react-router"
 import { z } from "zod"
+import { Cap } from "~/components/cap"
 import { Button } from "~/components/ui/button"
 import {
 	Field,
@@ -14,8 +15,10 @@ import {
 import { Input } from "~/components/ui/input"
 import { airsoft } from "~/services"
 import type { Route } from "./+types/_auth.register"
+import { useState } from "react"
 
 const schema = z.object({
+	captoken: z.string(),
 	email: z.email(),
 	password: z.string().min(8, {
 		message: "Jelszó túl rövid, legalább 8 karakter kell hogy legyen",
@@ -26,10 +29,27 @@ const schema = z.object({
 	intent: z.enum(["signup"]),
 })
 
-export default function SignupPage({ actionData }: Route.ComponentProps) {
+
+export const loader = () => {
+
+	const capendpoint = airsoft.env.CAP_CONNECTION_STRING
+
+	return { capendpoint }
+}
+
+
+export default function SignupPage({ actionData, loaderData }: Route.ComponentProps) {
 	const lastResult = actionData
 	const navigation = useNavigation()
-	const isSubmitting = navigation.state != "idle"
+	const [isCapSolved, setCapSolved] = useState(false)
+	const isIdle = navigation.state == "idle"
+
+	const canSubmit = (isCapSolved && isIdle)
+
+	const handleCapSolve = (e: { detail: { token: string } }) => {
+		setCapSolved(true)
+		return { token: e.detail.token }
+	}
 
 	const [form, fields] = useForm({
 		lastResult,
@@ -75,19 +95,23 @@ export default function SignupPage({ actionData }: Route.ComponentProps) {
 							<FieldError>{fields.username.errors}</FieldError>
 						</Field>
 
+						<Cap endpoint={loaderData.capendpoint} onSolve={handleCapSolve} />
+
 						<Field>
 							<Button
 								type="submit"
 								name="intent"
 								value="signup"
-								disabled={isSubmitting}
+								disabled={!canSubmit}
 							>
-								{isSubmitting ? "létrehozás..." : "Regisztrálok"}
+								{isIdle ? "Regisztrálok" : "létrehozás..."}
 							</Button>
 						</Field>
 
 						<FieldError>{form.errors && <p>{form.errors}</p>}</FieldError>
 					</FieldGroup>
+
+
 				</Form>
 
 				<Field>
@@ -110,6 +134,8 @@ export async function action({ request }: Route.ActionArgs) {
 	if (submission.status != "success") {
 		return submission.reply()
 	}
+
+	console.log(submission.value)
 
 	try {
 		const authResponse = await airsoft.auth.api.signUpEmail({
