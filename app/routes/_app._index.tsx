@@ -11,7 +11,7 @@ export function meta(_args: Route.MetaArgs) {
 	]
 }
 
-const LIMIT = 4
+const LISTED_EVENTS_LIMIT = 4
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
@@ -22,10 +22,10 @@ export async function loader({ request }: Route.LoaderArgs) {
 		.from(eventTable)
 		.where(cursor ? gt(eventTable.id, cursor) : undefined)
 		.orderBy(asc(eventTable.id))
-		.limit(LIMIT + 1)
+		.limit(LISTED_EVENTS_LIMIT + 1)
 
-	const hasMore = events.length == LIMIT + 1
-	const items = hasMore ? events.slice(0, LIMIT) : events
+	const hasMore = events.length == LISTED_EVENTS_LIMIT + 1
+	const items = hasMore ? events.slice(0, LISTED_EVENTS_LIMIT) : events
 	const nextCursor = hasMore ? items[items.length - 1].id : null
 
 	return { events: items, hasMore, nextCursor }

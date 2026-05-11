@@ -15,11 +15,11 @@ import {
 	ItemTitle,
 } from "~/components/ui/item"
 import { CommentSection } from "~/features/comments"
+import { requireSession } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
-import requireSession from "~/functions/requiresession"
 import { eventTable, registrationTable } from "~/schema/schema"
-import type { Route } from "./+types/_app.event.$id"
 import { airsoft } from "~/services"
+import type { Route } from "./+types/_app.event.$id"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	// does not require auth, but should only allow logged in users to sign up

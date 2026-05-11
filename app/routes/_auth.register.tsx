@@ -1,6 +1,7 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
+import { useState } from "react"
 import { Form, Link, redirect, useNavigation } from "react-router"
 import { z } from "zod"
 import { Cap } from "~/components/cap"
@@ -15,7 +16,6 @@ import {
 import { Input } from "~/components/ui/input"
 import { airsoft } from "~/services"
 import type { Route } from "./+types/_auth.register"
-import { useState } from "react"
 
 const schema = z.object({
 	captoken: z.string(),
@@ -145,6 +145,7 @@ export async function action({ request }: Route.ActionArgs) {
 				email: submission.value.email,
 				password: submission.value.password,
 				callbackURL: "/account",
+				claims: []
 			},
 			headers: request.headers,
 			asResponse: true,

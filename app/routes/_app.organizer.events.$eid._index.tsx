@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm"
 import { Link } from "react-router"
+import { requireSession } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
-import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
 import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.$eid._index"

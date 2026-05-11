@@ -8,7 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table"
-import requireSession from "~/functions/requiresession"
+import { requireSession } from "~/functions/auth-guard.server"
 import { eventTable } from "~/schema/schema"
 import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.organizer._index"

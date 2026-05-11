@@ -1,5 +1,5 @@
 import { Outlet } from "react-router"
-import requireSession from "~/functions/requiresession"
+import { requireSession } from "~/functions/auth-guard.server"
 import type { Route } from "./+types/_app.account"
 
 export async function loader({ request }: Route.LoaderArgs) {

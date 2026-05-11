@@ -3,7 +3,7 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { Form, Link, redirect } from "react-router"
 import { z } from "zod"
-import requireSession from "~/functions/requiresession"
+import { requireSession } from "~/functions/auth-guard.server"
 import { organizerApplicationsTable } from "~/schema/schema"
 import { airsoft } from "~/services"
 import type { Route } from "./+types/_app.account._index"
@@ -71,7 +71,7 @@ export default function ApplicationForm({
 		)
 
 	// TODO: check if the user has permissions
-	if (user?.role == "organizer") {
+	if (user?.claims.includes("organizer")) {
 		return (
 			<div>
 				<p>már szervező vagy</p>

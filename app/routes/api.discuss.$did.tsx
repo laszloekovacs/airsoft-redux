@@ -2,8 +2,8 @@ import { parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { z } from "zod/v4"
 import { commentTable } from "~/schema/schema"
-import type { Route } from "./+types/api.discuss.$did"
 import { airsoft } from "~/services"
+import type { Route } from "./+types/api.discuss.$did"
 
 // load comments, the parameter is the discussion table id
 export async function loader({ params }: Route.LoaderArgs) {

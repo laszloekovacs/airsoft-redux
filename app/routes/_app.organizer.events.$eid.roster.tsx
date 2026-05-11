@@ -1,9 +1,9 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
-import { useFetcher } from "react-router"
+import { redirect, useFetcher } from "react-router"
 import z from "zod"
-import { requireClaim } from "~/functions/auth-guard.server"
+import { hasClaims, requireSession } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, registrationTable } from "~/schema/schema"
@@ -17,7 +17,14 @@ const assignmentSchema = z.object({
 })
 
 export async function action({ params, request }: Route.ActionArgs) {
-	const { user } = await requireClaim(request, "organizer")
+	const { user } = await requireSession(request)
+
+	const isOrganizer = await hasClaims(user.claims, "organizer")
+
+	if (!isOrganizer) {
+		return redirect("/login")
+	}
+
 	// TODO: check if this is the users event
 
 	const formData = await request.formData()
