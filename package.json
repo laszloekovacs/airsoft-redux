@@ -8,7 +8,8 @@
     "start": "bun ./build/server/index.js",
     "db-push": "bunx drizzle-kit push",
     "auth:generate": "bunx --bun auth@latest generate --config ./app/services/auth.server.ts --output ./app/schema/auth-schema.ts",
-    "studio": "bunx drizzle-kit studio"
+    "studio": "bunx drizzle-kit studio",
+    "knip": "bunx knip"
   },
   "dependencies": {
     "@cap.js/widget": "^0.1.50",
