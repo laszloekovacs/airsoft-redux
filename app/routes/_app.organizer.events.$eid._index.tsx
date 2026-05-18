@@ -3,13 +3,13 @@ import { Link } from "react-router"
 import { requireSession } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
 import { eventTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.$eid._index"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
 
-	const events = await airsoft.db
+	const events = await ar.db
 		.select()
 		.from(eventTable)
 		.where(

@@ -2,7 +2,7 @@ import { parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { z } from "zod/v4"
 import { commentTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/api.discuss.$did"
 
 // load comments, the parameter is the discussion table id
@@ -14,7 +14,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 	}
 
 	// find the relevant comments, return it
-	const comments = await airsoft.db
+	const comments = await ar.db
 		.select()
 		.from(commentTable)
 		.where(eq(commentTable.discussionId, Number(did)))
@@ -42,7 +42,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 	}
 
 	// insert new comment
-	await airsoft.db.insert(commentTable).values({
+	await ar.db.insert(commentTable).values({
 		discussionId: Number(did),
 		message: submission.value.message,
 		userId: null,

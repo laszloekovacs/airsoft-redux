@@ -14,7 +14,7 @@ import {
 	FieldLabel,
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_auth.register"
 
 const schema = z.object({
@@ -32,7 +32,7 @@ const schema = z.object({
 
 export const loader = () => {
 
-	const capendpoint = airsoft.env.CAP_CONNECTION_STRING
+	const capendpoint = ar.env.CAP_CONNECTION_STRING
 
 	return { capendpoint }
 }
@@ -138,7 +138,7 @@ export async function action({ request }: Route.ActionArgs) {
 	console.log(submission.value)
 
 	try {
-		const authResponse = await airsoft.auth.api.signUpEmail({
+		const authResponse = await ar.auth.api.signUpEmail({
 			body: {
 				username: submission.value.username,
 				name: submission.value.username,
@@ -165,7 +165,7 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 		})
 	} catch (error) {
-		airsoft.log.error(error)
+		ar.log.error(error)
 
 		if (isAPIError(error)) {
 			return submission.reply({

@@ -1,7 +1,7 @@
 import { asc, gt } from "drizzle-orm"
 import { Link } from "react-router"
 import { eventTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app._index"
 
 export function meta(_args: Route.MetaArgs) {
@@ -17,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const cursor = Number(url.searchParams.get("cursor"))
 
-	const events = await airsoft.db
+	const events = await ar.db
 		.select()
 		.from(eventTable)
 		.where(cursor ? gt(eventTable.id, cursor) : undefined)

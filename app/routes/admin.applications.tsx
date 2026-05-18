@@ -1,11 +1,11 @@
 import React, { Suspense } from "react"
 import { organizerApplicationsTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/admin.applications"
 
 export async function loader(_args: Route.LoaderArgs) {
 	// load applications
-	const applicationsPromise = airsoft.db
+	const applicationsPromise = ar.db
 		.select()
 		.from(organizerApplicationsTable)
 		.execute()
