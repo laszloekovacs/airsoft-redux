@@ -3,9 +3,9 @@ import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
 import { Form, Link, redirect } from "react-router"
 import { z } from "zod"
-import requireSession from "~/functions/requiresession"
+import { requireSession } from "~/functions/auth-guard.server"
 import { organizerApplicationsTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app.account._index"
 
 const schema = z.object({
@@ -17,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
 
 	// look up application belonging to user
-	const [usersApplication] = await airsoft.db
+	const [usersApplication] = await ar.db
 		.select()
 		.from(organizerApplicationsTable)
 		.where(eq(organizerApplicationsTable.userId, user.id))
@@ -71,7 +71,7 @@ export default function ApplicationForm({
 		)
 
 	// TODO: check if the user has permissions
-	if (user?.role == "organizer") {
+	if (user?.claims.includes("organizer")) {
 		return (
 			<div>
 				<p>már szervező vagy</p>
@@ -115,7 +115,7 @@ async function createOrganizerApplication(
 	userId: string,
 	message: string,
 ): Promise<string | null> {
-	const result = await airsoft.db
+	const result = await ar.db
 		.insert(organizerApplicationsTable)
 		.values({
 			message,

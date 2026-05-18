@@ -1,6 +1,7 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { parseWithZod } from "@conform-to/zod/v4"
 import { isAPIError } from "better-auth/api"
+import { useState } from "react"
 import { Form, Link, redirect, useNavigation } from "react-router"
 import { z } from "zod"
 import { Cap } from "~/components/cap"
@@ -13,9 +14,8 @@ import {
 	FieldLabel,
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_auth.register"
-import { useState } from "react"
 
 const schema = z.object({
 	captoken: z.string(),
@@ -32,7 +32,7 @@ const schema = z.object({
 
 export const loader = () => {
 
-	const capendpoint = airsoft.env.CAP_CONNECTION_STRING
+	const capendpoint = ar.env.CAP_CONNECTION_STRING
 
 	return { capendpoint }
 }
@@ -138,13 +138,14 @@ export async function action({ request }: Route.ActionArgs) {
 	console.log(submission.value)
 
 	try {
-		const authResponse = await airsoft.auth.api.signUpEmail({
+		const authResponse = await ar.auth.api.signUpEmail({
 			body: {
 				username: submission.value.username,
 				name: submission.value.username,
 				email: submission.value.email,
 				password: submission.value.password,
 				callbackURL: "/account",
+				claims: []
 			},
 			headers: request.headers,
 			asResponse: true,
@@ -164,7 +165,7 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 		})
 	} catch (error) {
-		airsoft.log.error(error)
+		ar.log.error(error)
 
 		if (isAPIError(error)) {
 			return submission.reply({

@@ -1,13 +1,13 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react"
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4"
 import { eq } from "drizzle-orm"
-import { useFetcher } from "react-router"
+import { redirect, useFetcher } from "react-router"
 import z from "zod"
-import { requireRole } from "~/functions/auth-guard.server"
+import { hasClaims, requireSession } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
 import { user } from "~/schema/auth-schema"
 import { eventTable, registrationTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.$eid.roster"
 
 const assignmentSchema = z.object({
@@ -17,7 +17,14 @@ const assignmentSchema = z.object({
 })
 
 export async function action({ params, request }: Route.ActionArgs) {
-	const { user } = await requireRole(request, "organizer")
+	const { user } = await requireSession(request)
+
+	const isOrganizer = await hasClaims(user.claims, "organizer")
+
+	if (!isOrganizer) {
+		return redirect("/login")
+	}
+
 	// TODO: check if this is the users event
 
 	const formData = await request.formData()
@@ -30,7 +37,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 	// check for intent of assign, modify registrations
 	if (submission.value.intent == "assignToFaction") {
 		// TODO: use registration id not user id
-		await airsoft.db
+		await ar.db
 			.update(registrationTable)
 			.set({ faction: submission.value.faction ?? null })
 			.where(eq(registrationTable.id, submission.value.regId))
@@ -41,7 +48,7 @@ export async function action({ params, request }: Route.ActionArgs) {
 
 export async function loader({ params }: Route.LoaderArgs) {
 	// get the relevant event
-	const events = await airsoft.db
+	const events = await ar.db
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.id, Number(params.eid)))
@@ -49,7 +56,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 	// fetch the registrations relevant to this event
 	// join with user info
-	const registrations = await airsoft.db
+	const registrations = await ar.db
 		.select()
 		.from(registrationTable)
 		.where(eq(registrationTable.eventId, Number(params.eid)))

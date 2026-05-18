@@ -5,7 +5,7 @@ import { log } from "./pino.server"
 import { redisNamespace } from "./redis.server"
 import { storage } from "./storage.server"
 
-export const airsoft = {
+export const ar = {
 	db,
 	env,
 	auth,

@@ -5,10 +5,10 @@ import z from "zod"
 import { Button } from "~/components/ui/button"
 import { FieldError, FieldGroup, FieldLabel } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
+import { requireSession } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
-import requireSession from "~/functions/requiresession"
 import { eventTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app.organizer.events.new"
 
 const schema = z.object({
@@ -70,7 +70,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 	// TODO: transaction
 	// create an event in the database with a provided name
-	const result = await airsoft.db
+	const result = await ar.db
 		.insert(eventTable)
 		.values({
 			title: submission.value.title,

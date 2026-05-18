@@ -8,16 +8,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table"
-import requireSession from "~/functions/requiresession"
+import { requireSession } from "~/functions/auth-guard.server"
 import { eventTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app.organizer._index"
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const { user } = await requireSession(request)
 
 	// list users organized events
-	const events = await airsoft.db
+	const events = await ar.db
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.userId, user.id))

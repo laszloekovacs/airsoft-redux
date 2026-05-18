@@ -1,7 +1,7 @@
 import { asc, gt } from "drizzle-orm"
 import { Link } from "react-router"
 import { eventTable } from "~/schema/schema"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app._index"
 
 export function meta(_args: Route.MetaArgs) {
@@ -11,21 +11,21 @@ export function meta(_args: Route.MetaArgs) {
 	]
 }
 
-const LIMIT = 4
+const LISTED_EVENTS_LIMIT = 4
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const cursor = Number(url.searchParams.get("cursor"))
 
-	const events = await airsoft.db
+	const events = await ar.db
 		.select()
 		.from(eventTable)
 		.where(cursor ? gt(eventTable.id, cursor) : undefined)
 		.orderBy(asc(eventTable.id))
-		.limit(LIMIT + 1)
+		.limit(LISTED_EVENTS_LIMIT + 1)
 
-	const hasMore = events.length == LIMIT + 1
-	const items = hasMore ? events.slice(0, LIMIT) : events
+	const hasMore = events.length == LISTED_EVENTS_LIMIT + 1
+	const items = hasMore ? events.slice(0, LISTED_EVENTS_LIMIT) : events
 	const nextCursor = hasMore ? items[items.length - 1].id : null
 
 	return { events: items, hasMore, nextCursor }

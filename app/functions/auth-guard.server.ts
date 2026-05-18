@@ -1,24 +1,15 @@
-import {redirect} from "react-router"
-import { auth} from "~/services/auth.server"
+import { redirect } from "react-router"
+import { auth } from "~/services/auth.server"
 
+export async function requireSession(request: Request, redirectTo = "/login") {
+	const session = await auth.api.getSession(request)
+	if (!session) {
+		throw redirect(redirectTo)
+	}
 
-type Role = "user" | "organizer" | "admin"
-
-export async function requireAuth(request: Request) {
-    const session = await auth.api.getSession(request)
-
-    if(!session) throw redirect("/login")
-        
-    return session
+	return session
 }
 
-
-export async function requireRole(request: Request, ...roles: Role[]) {
-    const session = await requireAuth(request)
-
-    if(!roles.includes(session.user.role as Role)) {
-        throw redirect("/unauthorized")
-    }
-
-    return session
+export async function hasClaims(claims: string[], ...required: string[]) {
+	return required.every((claim) => claims.includes(claim))
 }

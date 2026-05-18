@@ -12,10 +12,10 @@ import {
 	FieldLabel,
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-import { airsoft } from "~/services"
+import { ar } from "~/services"
 import type { Route } from "./+types/_auth.login"
 
-const schema = z.object({
+const loginSchema = z.object({
 	email: z.email().nonempty(),
 	password: z.string().nonempty(),
 })
@@ -29,7 +29,7 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 		lastResult,
 		onValidate({ formData }) {
 			return parseWithZod(formData, {
-				schema,
+				schema: loginSchema,
 			})
 		},
 		shouldValidate: "onBlur",
@@ -90,14 +90,14 @@ export default function LoginPage({ actionData }: Route.ComponentProps) {
 
 export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData()
-	const submission = parseWithZod(formData, { schema })
+	const submission = parseWithZod(formData, { schema: loginSchema })
 
 	if (submission.status != "success") {
 		return submission.reply()
 	}
 
 	try {
-		const authResponse = await airsoft.auth.api.signInEmail({
+		const authResponse = await ar.auth.api.signInEmail({
 			body: {
 				email: submission.value.email,
 				password: submission.value.password,
@@ -121,7 +121,7 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 		})
 	} catch (error) {
-		airsoft.log.error(error)
+		ar.log.error(error)
 
 		if (isAPIError(error)) {
 			return submission.reply({

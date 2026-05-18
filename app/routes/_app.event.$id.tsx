@@ -15,17 +15,17 @@ import {
 	ItemTitle,
 } from "~/components/ui/item"
 import { CommentSection } from "~/features/comments"
+import { requireSession } from "~/functions/auth-guard.server"
 import expectOne from "~/functions/expectone"
-import requireSession from "~/functions/requiresession"
 import { eventTable, registrationTable } from "~/schema/schema"
+import { ar } from "~/services"
 import type { Route } from "./+types/_app.event.$id"
-import { airsoft } from "~/services"
 
 export async function loader({ params, request }: Route.LoaderArgs) {
 	// does not require auth, but should only allow logged in users to sign up
-	const sessionData = await airsoft.auth.api.getSession(request)
+	const sessionData = await ar.auth.api.getSession(request)
 
-	const events = await airsoft.db
+	const events = await ar.db
 		.select()
 		.from(eventTable)
 		.where(eq(eventTable.id, Number(params.id)))
@@ -36,7 +36,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 	// if authed user,
 	// check if user has a registration for this event, if logged in
 	if (sessionData?.user != null) {
-		const registrations = await airsoft.db
+		const registrations = await ar.db
 			.select()
 			.from(registrationTable)
 			.where(
@@ -106,7 +106,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 		// the page gets revalidated, so loader should indicate success and doesnt need to
 		// return any data trough comform, onConflictDoNothing will skip insertion
-		await airsoft.db
+		await ar.db
 			.insert(registrationTable)
 			.values({
 				userId: user.id,

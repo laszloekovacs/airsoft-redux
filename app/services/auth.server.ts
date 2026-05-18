@@ -1,13 +1,27 @@
+import type { BetterAuthPlugin } from "better-auth"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { admin as adminPlugin } from "better-auth/plugins/admin"
 import { username } from "better-auth/plugins/username"
 import * as authSchema from "~/schema/auth-schema"
 import * as schema from "~/schema/schema"
 import { db } from "~/services/drizzle.server"
 import { env } from "./env.server"
-import { ac, admin, organizer, user } from "./permissions.server"
 import { log } from "./pino.server"
+
+const claimsPlugin = () => {
+	return {
+		id: "claims-plugin",
+		schema: {
+			user: {
+				fields: {
+					claims: {
+						type: "string[]",
+					},
+				},
+			},
+		},
+	} satisfies BetterAuthPlugin
+}
 
 export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
@@ -25,15 +39,7 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
-		adminPlugin({
-			ac,
-			roles: {
-				admin,
-				user,
-				organizer,
-			},
-			defaultRole: "user",
-		}),
+		claimsPlugin(),
 
 		username({
 			usernameValidator: (username) => {

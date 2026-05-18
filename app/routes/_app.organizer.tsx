@@ -1,24 +1,17 @@
-import { Outlet } from "react-router"
-import requireSession from "~/functions/requiresession"
-import { airsoft } from "~/services"
+import { Outlet, redirect } from "react-router"
+import { hasClaims, requireSession } from "~/functions/auth-guard.server"
 import type { Route } from "./+types/_app.organizer"
 
 export async function loader({ request }: Route.LoaderArgs) {
-	// route guard
-	const permission = await airsoft.auth.api.userHasPermission({
-		body: {
-			role: "user",
-			permissions: {
-				event: ["apply"],
-			},
-		},
-	})
-
-	if (!permission.success) {
-		throw new Error("permission denied")
-	}
 
 	const { user } = await requireSession(request)
+
+
+	const isOrganizer = await hasClaims(user.claims, "organizer")
+
+	if (!isOrganizer) {
+		return redirect("/login")
+	}
 
 	return { user }
 }
